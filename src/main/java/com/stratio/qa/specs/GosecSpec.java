@@ -388,7 +388,7 @@ public class GosecSpec extends BaseGSpec {
      * @param loginInfo       : user and password to log in service (OPTIONAL)
      * @throws Exception
      */
-    @When("^I delete '(policy|user|group)' '(.+?)'( from tenant '(.+?)')?( with tenant user and tenant password '(.+:.+?)')?( using API service path '(.+?)')?( with user and password '(.+:.+?)')? if it exists$")
+    @When("^I delete '(policy|user|group|collectionPolicy)' '(.+?)'( from tenant '(.+?)')?( with tenant user and tenant password '(.+:.+?)')?( using API service path '(.+?)')?( with user and password '(.+:.+?)')? if it exists$")
     public void deleteUserIfExists(String resource, String resourceId, String tenantOrig, String tenantLoginInfo, String endPoint, String loginInfo) throws Exception {
         if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
             deleteResourceIfExistsKeos(resource, resourceId, tenantOrig, tenantLoginInfo, endPoint, loginInfo);
@@ -402,6 +402,8 @@ public class GosecSpec extends BaseGSpec {
         String endPointResource = "";
         String endPointPolicy = "/service/gosecmanagement" + ThreadProperty.get("API_POLICY");
         String endPointPolicies = "/service/gosecmanagement" + ThreadProperty.get("API_POLICIES");
+        String endPointCollectionPolicy = "";
+        String endPointCollectionsPolicies = "";
         String managementBaasVersion = ThreadProperty.get("gosec-management-baas_version");
 
         if (tenantOrig != null) {
@@ -416,6 +418,8 @@ public class GosecSpec extends BaseGSpec {
         if (managementBaasVersion != null) {
             endPointPolicies = "/service/gosec-management-baas/management/policies";
             endPointPolicy = "/service/gosec-management-baas/management/policy?pid=";
+            endPointCollectionsPolicies = "/service/gosec-management-baas/management/policies/domains";
+            endPointCollectionPolicy = "/service/gosec-management-baas/management/policy/domain?pid=";
         }
 
         if (endPoint != null) {
@@ -426,6 +430,13 @@ public class GosecSpec extends BaseGSpec {
                 if (managementBaasVersion != null) {
                     endPoint = "/service/gosec-management-baas/management/policy?pid=";
                 }
+            } else if (resource.equals("collectionPolicy")) {
+                if (managementBaasVersion == null) {
+                    commonspec.getLogger().error("Collections policies can only be used with gosec-management-baas");
+                    throw new Exception("Collections policies can only be used with gosec-management-baas");
+                }
+                endPointPolicy = endPointCollectionPolicy;
+                endPointPolicies = endPointCollectionsPolicies;
             } else {
                 if (resource.equals("user")) {
                     endPoint = "/service/gosecmanagement" + ThreadProperty.get("API_USER");
@@ -444,7 +455,7 @@ public class GosecSpec extends BaseGSpec {
         try {
             assertThat(commonspec.getRestHost().isEmpty() || commonspec.getRestPort().isEmpty());
 
-            if (resource.equals("policy")) {
+            if ((resource.equals("policy") || resource.equals("collectionPolicy"))) {
                 restSpec.sendRequestNoDataTable("GET", endPointPolicies, loginInfo, null, null);
                 if (commonspec.getResponse().getStatusCode() == 200) {
                     String policyId = getPolicyIdFromResponse(commonspec.getResponse().getResponse(), resourceId, managementBaasVersion != null);
