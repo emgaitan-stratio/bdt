@@ -1424,6 +1424,64 @@ public class KubernetesClient {
         k8sClient.pods().inNamespace(namespace).withName(podName).file(destinationPath).copy(Paths.get(filePath));
     }
 
+    /**
+     * Creates a new namespace with labels (if labelsMap != null)
+     * kubectl create namespace xxx
+     *
+     * @param namespaceName
+     * @param labelsMap
+     */
+    public void createNamespace(String namespaceName, Map<String, String> labelsMap) {
+        if (labelsMap != null) {
+            k8sClient.namespaces().createOrReplace(new NamespaceBuilder().withNewMetadata().withName(namespaceName).addToLabels(labelsMap).endMetadata().build());
+        } else {
+            k8sClient.namespaces().createOrReplace(new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
+        }
+    }
+
+    /**
+     * Creates a new serviceAccount
+     * kubectl create serviceaccount spark-test -n <namespace>
+     *
+     * @param serviceAccountName
+     * @param namespace
+     */
+    public void createServiceAccount(String serviceAccountName, String namespace) {
+        k8sClient.serviceAccounts().inNamespace(namespace).createOrReplace(new ServiceAccountBuilder().withNewMetadata().withName(serviceAccountName).endMetadata().build());
+    }
+
+    /**
+     * Creates a new clusterRole
+     * kubectl create clusterrole xxx --verb=get --verb=list --verb=watch --verb=create --verb=delete --resource=pods --resource=services --resource=configmaps --resource=secrets --namespace=<namespace>
+     *
+     * @param clusterRoleName
+     * @param namespace
+     * @param resources
+     * @param verbs
+     * @param apiGroups
+     */
+    public void createClusterRole(String clusterRoleName, String namespace, String resources, String verbs, String apiGroups) {
+        String[] resourcesList = resources.split(",");
+        String[] verbsList = verbs.split(",");
+        String[] apiGroupsList = apiGroups != null ? apiGroups.split(",") : new String[]{""};
+        PolicyRule policyRule = new PolicyRuleBuilder().addToApiGroups(apiGroupsList).addToResources(resourcesList).addToVerbs(verbsList).build();
+        k8sClient.rbac().clusterRoles().inNamespace(namespace).createOrReplace(new ClusterRoleBuilder().withRules(policyRule).withNewMetadata().withName(clusterRoleName).endMetadata().build());
+    }
+
+    /**
+     * Creates a new clusterRoleBinding
+     * kubectl create clusterrolebinding xxx --clusterrole=xxx --serviceaccount=<namespace>:<serviceaccount> --namespace=<namespace>
+     *
+     * @param clusterRoleBindingName
+     * @param namespace
+     * @param clusterRole
+     * @param serviceAccount
+     */
+    public void createClusterRoleBinding(String clusterRoleBindingName, String namespace, String clusterRole, String serviceAccount) {
+        Subject subject = new SubjectBuilder().withNewKind("ServiceAccount").withNewName(serviceAccount.split(":")[1]).withNewNamespace(serviceAccount.split(":")[0]).build();
+        k8sClient.rbac().clusterRoleBindings().inNamespace(namespace).createOrReplace(new ClusterRoleBindingBuilder().withNewRoleRef("", "ClusterRole", clusterRole).withSubjects(subject).withNewMetadata().withName(clusterRoleBindingName).endMetadata().build());
+    }
+
     private static class MyPodExecListener implements ExecListener {
         @Override
         public void onOpen(Response response) {
