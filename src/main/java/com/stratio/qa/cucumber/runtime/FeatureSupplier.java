@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.stratio.qa.cucumber.api;
 
-public @interface FeatureEnvironment {
+package com.stratio.qa.cucumber.runtime;
 
-    Condition[] conditions() default {};
+import com.stratio.qa.cucumber.runtime.model.CucumberFeature;
+import java.util.List;
 
-    String[] features() default {};
+public interface FeatureSupplier {
+    List<CucumberFeature> get();
 }

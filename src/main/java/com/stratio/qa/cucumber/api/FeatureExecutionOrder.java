@@ -16,9 +16,14 @@
 
 package com.stratio.qa.cucumber.api;
 
-public @interface FeatureEnvironment {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    Condition[] conditions() default {};
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface FeatureExecutionOrder {
 
-    String[] features() default {};
+    String order() default "";
 }
