@@ -19,6 +19,7 @@ package com.stratio.qa.clients.k8s;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stratio.qa.specs.CommandExecutionSpec;
 import com.stratio.qa.specs.CommonG;
+import com.stratio.qa.specs.FileSpec;
 import com.stratio.qa.utils.ThreadProperty;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition;
@@ -123,6 +124,10 @@ public class KubernetesClient {
             commandExecutionSpec.executeLocalCommand(commandRmTgz, null, null);
 
             // Obtain and export values
+            if (!new File("target/test-classes/" + workspaceName + "/keos.json").exists()) {
+                FileSpec fileSpec = new FileSpec(commonspec);
+                fileSpec.convertYamlToJson(workspaceName + "/keos.yaml", workspaceName + "/keos.json");
+            }
             String daedalusJson = commonspec.retrieveData(workspaceName + "/keos.json", "json");
             ThreadProperty.set("CLUSTER_SSH_USER", commonspec.getJSONPathString(daedalusJson, "$.infra.ssh_user", null).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", ""));
             ThreadProperty.set("CLUSTER_SSH_PEM_PATH", "./target/test-classes/" + workspaceName + "/key");
@@ -150,6 +155,9 @@ public class KubernetesClient {
 
         // Set variables from command-center-config configmap
         getK8sCCTConfig(commonspec);
+
+        // Set gosec and cct paths
+        getIngressPath();
 
         // Default values for some variables
         ThreadProperty.set("KEOS_PASSWORD", System.getProperty("KEOS_PASSWORD") != null ? System.getProperty("KEOS_PASSWORD") : "1234");
@@ -202,6 +210,19 @@ public class KubernetesClient {
             if (varName != null) {
                 ThreadProperty.set(varName, ingress.getSpec().getRules().get(0).getHost());
             }
+        }
+    }
+
+    private void getIngressPath() {
+        ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", "/ui");
+        Ingress gosecIngress = k8sClient.extensions().ingresses().inNamespace("keos-core").withName("gosec-management-ui").get();
+        if (gosecIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec")) {
+            ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", "/gosec");
+        }
+        ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct");
+        Ingress cctIngress = k8sClient.extensions().ingresses().inNamespace("keos-cct").withName("cct-ui").get();
+        if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct-ui")) {
+            ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct-ui");
         }
     }
 
