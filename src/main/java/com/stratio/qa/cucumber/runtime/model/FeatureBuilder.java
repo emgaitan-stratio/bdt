@@ -45,11 +45,14 @@ public class FeatureBuilder {
         //----STRATIO----
         switch (System.getProperty(FeatureBuilder.FEATURE_EXECUTION_ORDER_KEY, "")) {
             case FeatureBuilder.PRESERVE_ORDER:
+                log.debug("Executing cucumber features by definition order: ");
                 break;
             default:
+                log.debug("Executing cucumber features by default order: ");
                 Collections.sort(features, new CucumberFeature.CucumberFeatureUriComparator());
                 break;
         }
+        features.forEach(f -> log.debug("\t" + f.getUri().getPath()));
         return features;
     }
 
