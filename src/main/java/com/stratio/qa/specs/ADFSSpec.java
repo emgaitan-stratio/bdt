@@ -63,7 +63,7 @@ public class ADFSSpec extends BaseGSpec {
     public void createSisSynchronizerSecrets(String adfsCN) throws Exception {
         // Set REST connection
         commonspec.setCCTConnection(null, null);
-        gosecSpec.createUserResource(adfsCN, null, null, "keytab", "certificate", null);
+        gosecSpec.createUserResource(adfsCN, null, null, "keytab", "certificate", null, null);
         this.adfsCN = adfsCN;
     }
 

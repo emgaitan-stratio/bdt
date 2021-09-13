@@ -4,6 +4,7 @@ Only listing significant user-visible, not internal code cleanups and minor bug 
 
 ## 0.21.0 (upcoming)
 
+* [QATM-3773] Refactor creating cutom users/groups
 * [GS-3161] Add step to create custom JTW
 * [GS-3051] Fix check certificate creating federated users
 * Kubernetes support
