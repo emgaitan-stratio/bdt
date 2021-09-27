@@ -67,15 +67,15 @@ public class KubernetesClient {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesClient.class);
 
+    private KubernetesClient() {
+
+    }
+
     public static KubernetesClient getInstance() {
         if (CLIENT == null) {
             CLIENT = new KubernetesClient();
         }
         return CLIENT;
-    }
-
-    private KubernetesClient() {
-
     }
 
     public static Logger getLogger() {
@@ -219,10 +219,20 @@ public class KubernetesClient {
         if (gosecIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec")) {
             ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", "/gosec");
         }
+        if (gosecIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec/ui")) {
+            ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", "/gosec/ui");
+        }
         ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct");
         Ingress cctIngress = k8sClient.extensions().ingresses().inNamespace("keos-cct").withName("cct-ui").get();
         if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct-ui")) {
             ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct-ui");
+        } else if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/ui")) {
+            ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct/ui");
+        }
+        ThreadProperty.set("KEOS_GOSEC_BAAS_INGRESS_PATH", "/baas");
+        Ingress gosecBaasIngress = k8sClient.extensions().ingresses().inNamespace("keos-core").withName("gosec-management-baas").get();
+        if (gosecBaasIngress != null && gosecBaasIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec/baas")) {
+            ThreadProperty.set("KEOS_GOSEC_BAAS_INGRESS_PATH", "/gosec/baas");
         }
     }
 
@@ -263,10 +273,10 @@ public class KubernetesClient {
     /**
      * Obtain info from json and expose in thread variable
      *
-     * @param json          : json to look for info in
-     * @param jqExpression  : jq expression to obtain specific info from json
-     * @param envVar        : thread variable where to expose value
-     * @param position      : position in value obtained with jq
+     * @param json         : json to look for info in
+     * @param jqExpression : jq expression to obtain specific info from json
+     * @param envVar       : thread variable where to expose value
+     * @param position     : position in value obtained with jq
      */
     public void obtainJSONInfoAndExpose(CommonG commonspec, String json, String jqExpression, String envVar, String position) {
         String value = commonspec.getJSONPathString(json, jqExpression, position).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", "");
@@ -275,6 +285,7 @@ public class KubernetesClient {
 
     /**
      * kubectl get pods -n namespace
+     *
      * @param namespace
      */
     public String getNamespacePods(String namespace) {
@@ -299,6 +310,7 @@ public class KubernetesClient {
 
     /**
      * kubectl get events -n namespace
+     *
      * @param namespace
      */
     public Boolean checkEventNamespace(String not, String namespace, String type, String name, String reason, String message) {
@@ -316,7 +328,7 @@ public class KubernetesClient {
     /**
      * Return pod object
      *
-     * @param podName Pod name
+     * @param podName   Pod name
      * @param namespace Namespace
      * @return Pod object
      */
@@ -328,7 +340,7 @@ public class KubernetesClient {
      * Return deployment object
      *
      * @param deploymentName Deployment name
-     * @param namespace Namespace
+     * @param namespace      Namespace
      * @return Deployment object
      */
     public Deployment getDeployment(String deploymentName, String namespace) {
@@ -338,7 +350,7 @@ public class KubernetesClient {
     /**
      * kubectl describe pod
      *
-     * @param podName Pod name
+     * @param podName   Pod name
      * @param namespace Namespace (optional)
      * @return String with pod yaml
      * @throws JsonProcessingException
@@ -351,7 +363,7 @@ public class KubernetesClient {
      * kubectl describe service myservice
      *
      * @param serviceName Service
-     * @param namespace Namespace
+     * @param namespace   Namespace
      * @return String with service yaml
      */
     public String describeServiceYaml(String serviceName, String namespace) throws Exception {
@@ -365,7 +377,7 @@ public class KubernetesClient {
      * kubectl describe deployment myDeployment
      *
      * @param deploymentName Service
-     * @param namespace Namespace
+     * @param namespace      Namespace
      * @return String with service yaml
      */
     public String describeDeploymentYaml(String deploymentName, String namespace) throws Exception {
@@ -375,8 +387,8 @@ public class KubernetesClient {
     /**
      * kubectl describe pgcluster xxx -n xxxx
      *
-     * @param name customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
-     * @param nameItem pgcluster name
+     * @param name      customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
+     * @param nameItem  pgcluster name
      * @param namespace Namespace
      * @return String with custom resource in json format
      */
@@ -434,7 +446,7 @@ public class KubernetesClient {
      * kubectl get pgcluster -n xxxxx
      * Using a custom resource
      *
-     * @param name customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
+     * @param name      customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
      * @param namespace
      */
     public String getCustomResource(String name, String namespace) throws IOException {
@@ -454,8 +466,8 @@ public class KubernetesClient {
     /**
      * Using a custom resource
      *
-     * @param name customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
-     * @param nameItem pgcluster name
+     * @param name      customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
+     * @param nameItem  pgcluster name
      * @param namespace Namespace
      * @return replicas number is ready
      */
@@ -480,8 +492,8 @@ public class KubernetesClient {
     /**
      * Using a custom resource
      *
-     * @param name customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
-     * @param nameItem pgcluster name
+     * @param name      customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
+     * @param nameItem  pgcluster name
      * @param namespace Namespace
      * @return global status
      */
@@ -506,8 +518,8 @@ public class KubernetesClient {
     /**
      * Using a custom resource
      *
-     * @param name customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
-     * @param nameItem pgcluster name
+     * @param name      customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
+     * @param nameItem  pgcluster name
      * @param namespace Namespace
      * @return global status description
      */
@@ -532,9 +544,9 @@ public class KubernetesClient {
     /**
      * kubectl create deployment xxx -n namespace --image myimage
      *
-     * @param deploymentName Deployment name
-     * @param namespace Namespace
-     * @param image Image
+     * @param deploymentName  Deployment name
+     * @param namespace       Namespace
+     * @param image           Image
      * @param imagePullPolicy Image pull policy (IfNotPresent as default value)
      */
     public void createDeployment(String deploymentName, String namespace, String image, String imagePullPolicy) {
@@ -569,8 +581,8 @@ public class KubernetesClient {
      * kubectl expose deployment xxx -n namespace --port=xxxx
      *
      * @param deploymentName Deployment to expose
-     * @param namespace Namespace
-     * @param port Port to expose
+     * @param namespace      Namespace
+     * @param port           Port to expose
      */
     public void exposeDeployment(String deploymentName, String namespace, Integer port) {
         Service service = new ServiceBuilder()
@@ -592,7 +604,7 @@ public class KubernetesClient {
     /**
      * kubectl logs pod
      *
-     * @param pod Pod name
+     * @param pod       Pod name
      * @param namespace Namespace
      * @return pod log
      */
@@ -602,9 +614,10 @@ public class KubernetesClient {
 
     /**
      * kubectl exec mypod -- command
-     * @param pod Pod
+     *
+     * @param pod       Pod
      * @param namespace Namespace
-     * @param command Command to execute
+     * @param command   Command to execute
      * @throws InterruptedException
      */
     public String execCommand(String pod, String namespace, String[] command) throws InterruptedException {
@@ -630,14 +643,14 @@ public class KubernetesClient {
     /**
      * kubectl run xxx --image=xxx --restart=xxx --serviceaccount=xxx --namespace=xxx --command -- mycommand
      *
-     * @param podName Pod name
-     * @param namespace Namespace
-     * @param image Image
+     * @param podName         Pod name
+     * @param namespace       Namespace
+     * @param image           Image
      * @param imagePullPolicy Image pull policy (IfNotPresent as default value)
-     * @param restartPolicy Restart policy
-     * @param serviceAccount Service Account
-     * @param command Command to execute
-     * @param args Command arguments
+     * @param restartPolicy   Restart policy
+     * @param serviceAccount  Service Account
+     * @param command         Command to execute
+     * @param args            Command arguments
      */
     public void runPod(String podName, String namespace, String image, String imagePullPolicy, String restartPolicy, String serviceAccount, String command, List<String> args) {
         imagePullPolicy = imagePullPolicy != null ? imagePullPolicy : "IfNotPresent";
@@ -655,15 +668,15 @@ public class KubernetesClient {
     /**
      * kubectl run xxx --image=xxx --restart=xxx --serviceaccount=xxx --namespace=xxx --command -- mycommand
      *
-     * @param podName Pod name
-     * @param namespace Namespace
-     * @param image Image
+     * @param podName         Pod name
+     * @param namespace       Namespace
+     * @param image           Image
      * @param imagePullPolicy Image pull policy (IfNotPresent as default value)
-     * @param restartPolicy Restart policy
-     * @param serviceAccount Service Account
-     * @param env Environment variables
-     * @param command Command to execute
-     * @param args Command arguments
+     * @param restartPolicy   Restart policy
+     * @param serviceAccount  Service Account
+     * @param env             Environment variables
+     * @param command         Command to execute
+     * @param args            Command arguments
      */
     public void runPod(String podName, String namespace, String image, String imagePullPolicy, String restartPolicy, String serviceAccount, Map<String, String> env, String command, List<String> args) {
         imagePullPolicy = imagePullPolicy != null ? imagePullPolicy : "IfNotPresent";
@@ -682,7 +695,7 @@ public class KubernetesClient {
     /**
      * kubectl delete pod mypod
      *
-     * @param pod Pod to delete
+     * @param pod       Pod to delete
      * @param namespace Namespace
      */
     public void deletePod(String pod, String namespace) {
@@ -693,7 +706,7 @@ public class KubernetesClient {
      * kubectl delete deployment mydeployment
      *
      * @param deployment Deployment to delete
-     * @param namespace Namespace
+     * @param namespace  Namespace
      */
     public void deleteDeployment(String deployment, String namespace) {
         k8sClient.apps().deployments().inNamespace(namespace).withName(deployment).delete();
@@ -702,7 +715,7 @@ public class KubernetesClient {
     /**
      * kubectl delete service myservice
      *
-     * @param service Service to delete
+     * @param service   Service to delete
      * @param namespace Namespace
      */
     public void deleteService(String service, String namespace) {
@@ -712,7 +725,7 @@ public class KubernetesClient {
     /**
      * kubectl delete service myservice
      *
-     * @param label label filter witch has persistent volume claims to delete
+     * @param label     label filter witch has persistent volume claims to delete
      * @param namespace Namespace
      */
     public void deletePersistentVolumeClaimsWithLabel(String label, String namespace) {
@@ -723,8 +736,8 @@ public class KubernetesClient {
      * kubectl delete pgcluster mypgcluster
      * Using a custom resource
      *
-     * @param name customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
-     * @param nameItem pgcluster name
+     * @param name      customresourcedefinition name (ex:pgclusters.postgres.stratio.com)
+     * @param nameItem  pgcluster name
      * @param namespace Namespace
      */
     public void deleteCustomResourceItem(String name, String nameItem, String namespace) throws IOException {
@@ -737,7 +750,7 @@ public class KubernetesClient {
      * kubectl scale --replicas=4 -n namespace deploy/xxx
      *
      * @param deployment deployment to scale
-     * @param namespace Namespace
+     * @param namespace  Namespace
      */
     public void scaleDeployment(String deployment, String namespace, Integer instances) {
         k8sClient.apps().deployments().inNamespace(namespace).withName(deployment).scale(instances);
@@ -749,7 +762,7 @@ public class KubernetesClient {
      * @param selector Label filter (separated by comma)
      * @return LabelSelector
      */
-    private LabelSelector getLabelSelector (String selector) {
+    private LabelSelector getLabelSelector(String selector) {
         String[] arraySelector = selector.split(",");
         LabelSelector labelSelector = new LabelSelector();
         Map<String, String> expressions = new HashMap<>();
@@ -768,7 +781,7 @@ public class KubernetesClient {
     /**
      * kubectl get pods --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return Pods list filtered
      */
@@ -788,7 +801,7 @@ public class KubernetesClient {
     /**
      * kubectl get deployments --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return Deployments list filtered
      */
@@ -808,7 +821,7 @@ public class KubernetesClient {
     /**
      * kubectl get replicasets --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return Replicasets list filtered
      */
@@ -828,7 +841,7 @@ public class KubernetesClient {
     /**
      * kubectl get services --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return services list filtered
      */
@@ -848,7 +861,7 @@ public class KubernetesClient {
     /**
      * kubectl get statefulsets --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return StateFulSets list filtered
      */
@@ -868,7 +881,7 @@ public class KubernetesClient {
     /**
      * kubectl get configmaps --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return ConfigMaps list filtered
      */
@@ -888,7 +901,7 @@ public class KubernetesClient {
     /**
      * kubectl get serviceaccounts --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return ServiceAccounts list filtered
      */
@@ -908,7 +921,7 @@ public class KubernetesClient {
     /**
      * kubectl get roles --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return Roles list filtered
      */
@@ -928,7 +941,7 @@ public class KubernetesClient {
     /**
      * kubectl get rolebindings --selector=version=v1 -o jsonpath='{.items[*].metadata.name}'
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return Role list filtered
      */
@@ -948,7 +961,7 @@ public class KubernetesClient {
     /**
      * kubectl get pods --field-selector=status.phase=Running
      *
-     * @param selector Label filter (separated by comma)
+     * @param selector  Label filter (separated by comma)
      * @param namespace Namespace
      * @return Pods list filtered
      */
@@ -973,7 +986,7 @@ public class KubernetesClient {
     /**
      * Get a configmap
      *
-     * @param name Config map name
+     * @param name      Config map name
      * @param namespace Namespace
      */
     public ConfigMap getConfigMap(String name, String namespace) {
@@ -998,18 +1011,17 @@ public class KubernetesClient {
      * kubectl describe configmap xxx -n namespace
      *
      * @param configMapName Config map name
-     * @param namespace Namespace
-     *
+     * @param namespace     Namespace
      * @return String with config map
      */
-    public String describeConfigMap(String configMapName, String namespace)  {
+    public String describeConfigMap(String configMapName, String namespace) {
         return getConfigMap(configMapName, namespace).getData().toString();
     }
 
     /**
      * Get a replicaset
      *
-     * @param name Replicaset name
+     * @param name      Replicaset name
      * @param namespace Namespace
      */
     public ReplicaSet getReplicaSet(String name, String namespace) {
@@ -1034,8 +1046,7 @@ public class KubernetesClient {
      * kubectl describe replicaset xxx -n namespace
      *
      * @param replicaSetName Config map name
-     * @param namespace Namespace
-     *
+     * @param namespace      Namespace
      * @return String with replicaset
      */
     public String describeReplicaSet(String replicaSetName, String namespace) throws JsonProcessingException {
@@ -1045,7 +1056,7 @@ public class KubernetesClient {
     /**
      * Get a serviceAccount
      *
-     * @param name serviceAccount name
+     * @param name      serviceAccount name
      * @param namespace Namespace
      */
     public ServiceAccount getServiceAccount(String name, String namespace) {
@@ -1070,8 +1081,7 @@ public class KubernetesClient {
      * kubectl describe serviceaccount xxx -n namespace
      *
      * @param serviceAccountName serviceAccount name
-     * @param namespace Namespace
-     *
+     * @param namespace          Namespace
      * @return String with serviceAccount
      */
     public String describeServiceAccount(String serviceAccountName, String namespace) throws JsonProcessingException {
@@ -1081,7 +1091,7 @@ public class KubernetesClient {
     /**
      * Get secret
      *
-     * @param name secret name
+     * @param name      secret name
      * @param namespace Namespace
      */
     public Secret getSecret(String name, String namespace) {
@@ -1106,8 +1116,7 @@ public class KubernetesClient {
      * kubectl describe secret xxx -n namespace
      *
      * @param secretName secret name
-     * @param namespace Namespace
-     *
+     * @param namespace  Namespace
      * @return String with secret
      */
     public String describeSecret(String secretName, String namespace) throws JsonProcessingException {
@@ -1117,7 +1126,7 @@ public class KubernetesClient {
     /**
      * Get clusterrole
      *
-     * @param name clusterrole name
+     * @param name      clusterrole name
      * @param namespace Namespace
      */
     public ClusterRole getClusterRole(String name, String namespace) {
@@ -1141,9 +1150,8 @@ public class KubernetesClient {
     /**
      * kubectl describe clusterrole xxx -n namespace
      *
-     * @param crName clusterrole name
+     * @param crName    clusterrole name
      * @param namespace Namespace
-     *
      * @return String with clusterrole
      */
     public String describeClusterRole(String crName, String namespace) throws JsonProcessingException {
@@ -1153,7 +1161,7 @@ public class KubernetesClient {
     /**
      * Get clusterrolebinding
      *
-     * @param name clusterrolebinding name
+     * @param name      clusterrolebinding name
      * @param namespace Namespace
      */
     public ClusterRoleBinding getClusterRoleBinding(String name, String namespace) {
@@ -1177,9 +1185,8 @@ public class KubernetesClient {
     /**
      * kubectl describe clusterrolebinding xxx -n namespace
      *
-     * @param crName clusterrolebinding name
+     * @param crName    clusterrolebinding name
      * @param namespace Namespace
-     *
      * @return String with clusterrolebinding
      */
     public String describeClusterRoleBinding(String crName, String namespace) throws JsonProcessingException {
@@ -1189,7 +1196,7 @@ public class KubernetesClient {
     /**
      * Get statefulset
      *
-     * @param name statefulset name
+     * @param name      statefulset name
      * @param namespace Namespace
      */
     public StatefulSet getStateFulSet(String name, String namespace) {
@@ -1214,8 +1221,7 @@ public class KubernetesClient {
      * kubectl describe statefulset xxx -n namespace
      *
      * @param stateFulSetName statefulset name
-     * @param namespace Namespace
-     *
+     * @param namespace       Namespace
      * @return String with statefulset
      */
     public String describeStateFulSet(String stateFulSetName, String namespace) throws JsonProcessingException {
@@ -1225,7 +1231,7 @@ public class KubernetesClient {
     /**
      * Get role
      *
-     * @param name role name
+     * @param name      role name
      * @param namespace Namespace
      */
     public Role getRole(String name, String namespace) {
@@ -1249,9 +1255,8 @@ public class KubernetesClient {
     /**
      * kubectl describe role xxx -n namespace
      *
-     * @param roleName role name
+     * @param roleName  role name
      * @param namespace Namespace
-     *
      * @return String with role
      */
     public String describeRole(String roleName, String namespace) throws JsonProcessingException {
@@ -1261,7 +1266,7 @@ public class KubernetesClient {
     /**
      * Get rolebinding
      *
-     * @param name rolebinding name
+     * @param name      rolebinding name
      * @param namespace Namespace
      */
     public RoleBinding getRoleBinding(String name, String namespace) {
@@ -1285,16 +1290,15 @@ public class KubernetesClient {
     /**
      * kubectl describe rolebinding xxx -n namespace
      *
-     * @param roleName rolebinding name
+     * @param roleName  rolebinding name
      * @param namespace Namespace
-     *
      * @return String with rolebinding
      */
     public String describeRoleBinding(String roleName, String namespace) throws JsonProcessingException {
         return SerializationUtils.dumpAsYaml(getRoleBinding(roleName, namespace));
     }
 
-     /**
+    /**
      * Get customresourcedefinition list
      *
      * @return customresourcedefinition list
@@ -1338,7 +1342,7 @@ public class KubernetesClient {
     /**
      * Get ingress
      *
-     * @param name name
+     * @param name      name
      * @param namespace Namespace
      * @return Ingress
      */
@@ -1364,18 +1368,18 @@ public class KubernetesClient {
      * kubectl describe ingress -n namespace
      *
      * @param ingressName Ingress name
-     * @param namespace Namespace
+     * @param namespace   Namespace
      * @return String with ingress information
      */
     public String describeIngress(String ingressName, String namespace) throws JsonProcessingException {
         return SerializationUtils.dumpAsYaml(getIngress(ingressName, namespace));
     }
 
-     /**
+    /**
      * Set local port forward for a service
      *
-     * @param namespace Namespace
-     * @param name Name
+     * @param namespace     Namespace
+     * @param name          Name
      * @param containerPort container port
      * @param localHostPort local host port
      */
@@ -1389,8 +1393,8 @@ public class KubernetesClient {
     /**
      * Set local port forward for a pod
      *
-     * @param namespace Namespace
-     * @param name Name
+     * @param namespace     Namespace
+     * @param name          Name
      * @param containerPort container port
      * @param localHostPort local host port
      */
@@ -1403,23 +1407,23 @@ public class KubernetesClient {
     public void closePortForward(String id) throws IOException {
         if (id != null) {
             localPortForward = localPortForwardMap.get(id);
-            this.localPortForwardId = id;
+            localPortForwardId = id;
         }
         if (localPortForward != null && localPortForward.isAlive()) {
             localPortForward.close();
         }
         localPortForward = null;
         if (localPortForwardId != null) {
-            localPortForwardMap.remove(this.localPortForwardId);
+            localPortForwardMap.remove(localPortForwardId);
         }
-        this.localPortForwardId = null;
+        localPortForwardId = null;
     }
 
     /**
      * kubectl patch hpa <deployment> -n <namespace> -p '{"spec":{"maxReplicas": <number>}}'
      *
-     * @param namespace Namespace
-     * @param name Deployment name
+     * @param namespace   Namespace
+     * @param name        Deployment name
      * @param maxReplicas Max replicas
      */
     public void updateHorizontalAutoscaler(String namespace, String name, int maxReplicas) {
@@ -1429,8 +1433,8 @@ public class KubernetesClient {
     /**
      * kubectl patch hpa <deployment> -n <namespace> -p '{"spec":{"minReplicas": <number>, "maxReplicas": <number>}}'
      *
-     * @param namespace Namespace
-     * @param name Deployment name
+     * @param namespace   Namespace
+     * @param name        Deployment name
      * @param maxReplicas Max replicas
      */
     public void updateHorizontalAutoscaler(String namespace, String name, int minReplicas, int maxReplicas) {

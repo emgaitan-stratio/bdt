@@ -261,7 +261,8 @@ public class GosecSpec extends BaseGSpec {
         Integer[] expectedStatusDelete = {200, 204};
         String endPointResource = "";
         String resourcePrefix = getResourcePrefix(resource);
-        String endPointPolicies = "/baas/management/policies";
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        String endPointPolicies = baasPath + "/management/policies";
 
         if (tenantOrig != null) {
             // Set REST connection
@@ -349,13 +350,14 @@ public class GosecSpec extends BaseGSpec {
     }
 
     private String getResourceEndpoint(String resource) {
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
         switch (resource) {
             case "policy":
-                return "/baas/management/policy";
+                return baasPath + "/management/policy";
             case "user":
-                return "/baas/management/user";
+                return baasPath + "/management/user";
             case "group":
-                return "/baas/management/group";
+                return baasPath + "/management/group";
             default:
                 return "";
         }
@@ -496,7 +498,8 @@ public class GosecSpec extends BaseGSpec {
         Integer[] expectedStatusDelete = {200, 204};
         String endPointResource = "";
         String resourcePrefix = getResourcePrefix(resource);
-        String endPointPolicies = "/baas/management/policies";
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        String endPointPolicies = baasPath + "/management/policies";
 
         if (tenantOrig != null) {
             // Set REST connection
@@ -581,9 +584,11 @@ public class GosecSpec extends BaseGSpec {
     }
 
     private void getPolicyIdKeos(String tag, String policyName, String tenantOrig, String tenantLoginInfo, String envVar) throws Exception {
-        String endPoint = "/baas/management/policies";
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        String endPoint = baasPath + "/management/policies";
+
         if (tag != null) {
-            endPoint = "/baas/management/policies/tags";
+            endPoint += "/tags";
         }
         getPolicyIdCommon(endPoint, policyName, tenantOrig, tenantLoginInfo, envVar);
     }
@@ -846,12 +851,13 @@ public class GosecSpec extends BaseGSpec {
     }
 
     private void getPolicyJsonKeos(String tag, String policyName, String tenantOrig, String tenantLoginInfo, String envVar, String fileName) throws Exception {
-        String endPoint = "/baas/management/policy";
-        String endPointPolicies = "/baas/management/policies";
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        String endPoint = baasPath + "/management/policy";
+        String endPointPolicies = baasPath + "/management/policies";
 
         if (tag != null) {
-            endPoint = "/baas/management/policy/tags";
-            endPointPolicies = "/baas/management/policies/tags";
+            endPoint = baasPath + "management/policy/tags";
+            endPointPolicies = baasPath + "/management/policies/tags";
         }
 
         if (tenantOrig != null) {
@@ -1109,7 +1115,8 @@ public class GosecSpec extends BaseGSpec {
     private void updateResourceKeos(String resource, String resourceId, String tenantOrig, String tenantLoginInfo, String loginInfo, String baseData, String type, DataTable modifications) throws Exception {
         Integer[] expectedStatusUpdate = {200, 201, 204};
         String resourcePrefix = getResourcePrefix(resource);
-        String endPointPolicies = "/baas/management/policies";
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        String endPointPolicies = baasPath + "/management/policies";
         String endPoint = getResourceEndpoint(resource);
         String endPointResource = endPoint + resourcePrefix + resourceId;
 
@@ -1354,7 +1361,8 @@ public class GosecSpec extends BaseGSpec {
     }
 
     private void createUserResourceKeos(String userName, String tenantOrig, String tenantLoginInfo, String keytab, String certificate, String groups, boolean doesNotExist) throws Exception {
-        String endPoint = "/baas/management/user";
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        String endPoint = baasPath + "/management/user";
         String endPointResource = "";
         Integer[] expectedStatusDelete = {200, 204};
         String uid = userName.replaceAll("\\s+", ""); //delete white spaces
@@ -1508,7 +1516,8 @@ public class GosecSpec extends BaseGSpec {
     }
 
     private void createGroupResourceKeos(String groupName, String tenantOrig, String tenantLoginInfo, String users, String groups, boolean doesNotExist) throws Exception {
-        String endPoint = "/baas/management/group";
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        String endPoint = baasPath + "/management/group";
         String endPointResource = "";
         String gid = groupName.replaceAll("\\s+", ""); //delete white spaces
         String data = generateBaasGroupJson(gid, groupName, users, groups);
@@ -1713,7 +1722,8 @@ public class GosecSpec extends BaseGSpec {
     }
 
     public void getServiceVersionKeos(String serviceType, String serviceId, String tenant, String tenantLoginInfo, String envVar) throws Exception {
-        String endpoint = "/baas/management/services";
+        String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        String endpoint = baasPath + "/management/services";
         getServiceVersionCommon(endpoint, serviceType, serviceId, tenant, tenantLoginInfo, envVar, "N/A", true);
     }
 
