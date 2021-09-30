@@ -229,6 +229,16 @@ public class KubernetesClient {
         } else if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/ui")) {
             ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct/ui");
         }
+        ThreadProperty.set("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH", "/cct-orchestrator-service");
+        Ingress cctOrchestratorIngress = k8sClient.extensions().ingresses().inNamespace("keos-cct").withName("cct-orchestrator-service").get();
+        if (cctOrchestratorIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/cct-orchestrator-service")) {
+            ThreadProperty.set("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH", "/cct/cct-orchestrator-service");
+        }
+        ThreadProperty.set("KEOS_CCT_UNIVERSE_SERVICE_INGRESS_PATH", "/cct-universe-service");
+        Ingress cctUniverseServiceIngress = k8sClient.extensions().ingresses().inNamespace("keos-cct").withName("cct-universe-service").get();
+        if (cctUniverseServiceIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/cct-universe-service")) {
+            ThreadProperty.set("KEOS_CCT_UNIVERSE_SERVICE_INGRESS_PATH", "/cct/cct-universe-service");
+        }
         ThreadProperty.set("KEOS_GOSEC_BAAS_INGRESS_PATH", "/baas");
         Ingress gosecBaasIngress = k8sClient.extensions().ingresses().inNamespace("keos-core").withName("gosec-management-baas").get();
         if (gosecBaasIngress != null && gosecBaasIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec/baas")) {
