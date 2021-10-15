@@ -387,7 +387,12 @@ public class K8SSpec extends BaseGSpec {
 
     @When("^I expose deployment with name '(.+?)', in namespace '(.+?)' in port '(\\d+)'$")
     public void createDeployment(String name, String namespace, Integer port) {
-        commonspec.kubernetesClient.exposeDeployment(name, namespace, port);
+        commonspec.kubernetesClient.exposeDeployment(name, name, "ClusterIP", namespace, port);
+    }
+
+    @When("^I expose deployment with name '(.+?)', in namespace '(.+?)' in port '(\\d+)' with type '(ClusterIP|LoadBalancer)'( and service name '(.+?)')?$")
+    public void createDeployment(String name, String namespace, Integer port, String type, String serviceName) {
+        commonspec.kubernetesClient.exposeDeployment(name, serviceName, type, namespace, port);
     }
 
     @When("^I get log from pod with name '(.+?)' in namespace '(.+?)'( and save it in environment variable '(.*?)')?( and save it in file '(.*?)')?$")
