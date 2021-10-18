@@ -617,14 +617,13 @@ public class KubernetesClient {
      * @param namespace      Namespace
      * @param port           Port to expose
      */
-    public void exposeDeployment(String deploymentName, String serviceName, String type, String namespace, Integer port) {
+    public void exposeDeployment(String deploymentName, String serviceName, String type, String namespace, Integer port, Boolean cctApp) {
         Service service = new ServiceBuilder()
                 .withNewMetadata()
                 .withName(serviceName != null ? serviceName : deploymentName)
                 .endMetadata()
                 .withNewSpec()
-                .withSelector(Collections.singletonMap("app", deploymentName))
-                .withSelector(Collections.singletonMap("cct.stratio.com/application_id", deploymentName))
+                .withSelector(Collections.singletonMap(cctApp ? "cct.stratio.com/application_id" : "app", deploymentName))
                 .addNewPort()
                 .withProtocol("TCP")
                 .withPort(port)
