@@ -1324,7 +1324,9 @@ public class CCTSpec extends BaseGSpec {
         String data = this.commonspec.retrieveData(jsonFile, "json");
         if (namespace != null) {
             List<List<String>> rawData = Arrays.asList(
-                    Arrays.asList("$.deployment.general.k8sNamespace", "ADD", namespace, "string")
+                    Arrays.asList("$.deployment.general.k8sNamespace", "ADD", namespace, "string"),
+                    Arrays.asList("$.deployment.general.namespaces", "ADD", "{}", "object"),
+                    Arrays.asList("$.deployment.general.namespaces.k8sNamespace", "ADD", namespace, "string")
             );
             DataTable modifications = DataTable.create(rawData);
             data = this.commonspec.modifyData(data, "json", modifications);
