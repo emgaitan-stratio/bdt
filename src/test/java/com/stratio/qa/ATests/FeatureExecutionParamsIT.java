@@ -15,10 +15,7 @@
  */
 package com.stratio.qa.ATests;
 
-
-import com.stratio.qa.cucumber.api.CucumberOptionsCustom;
-import com.stratio.qa.cucumber.api.FeatureEnvironment;
-import com.stratio.qa.cucumber.api.FeatureExecutionOrder;
+import com.stratio.qa.cucumber.api.FeatureExecutionParams;
 import com.stratio.qa.cucumber.runtime.model.FeatureBuilder;
 import com.stratio.qa.cucumber.testng.CucumberFeatureWrapper;
 import com.stratio.qa.cucumber.testng.PickleEventWrapper;
@@ -30,10 +27,14 @@ import org.testng.annotations.Test;
         "src/test/resources/features/Test.feature",
         "src/test/resources/features/Test3.feature",
         "src/test/resources/features/Test1.feature",
-        "src/test/resources/features/Test2.feature"
+        "src/test/resources/features/Test2.feature",
+        "src/test/resources/features/Test1.feature"
 })
-@FeatureExecutionOrder(order = FeatureBuilder.PRESERVE_ORDER)
-public class TestIT extends BaseGTest {
+@FeatureExecutionParams(
+        order = FeatureBuilder.PRESERVE_ORDER,
+        allowDuplicates = FeatureBuilder.ALLOW_DUPLICATED_FEATURES
+)
+public class FeatureExecutionParamsIT extends BaseGTest {
 
     @Test(dataProvider = "scenarios")
     public void run(PickleEventWrapper pickleWrapper, CucumberFeatureWrapper featureWrapper) throws Throwable {
