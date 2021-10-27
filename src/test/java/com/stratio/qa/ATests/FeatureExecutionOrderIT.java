@@ -15,7 +15,7 @@
  */
 package com.stratio.qa.ATests;
 
-import com.stratio.qa.cucumber.api.FeatureExecutionParams;
+import com.stratio.qa.cucumber.api.FeatureExecutionOrder;
 import com.stratio.qa.cucumber.runtime.model.FeatureBuilder;
 import com.stratio.qa.cucumber.testng.CucumberFeatureWrapper;
 import com.stratio.qa.cucumber.testng.PickleEventWrapper;
@@ -35,23 +35,21 @@ import static org.assertj.core.api.Assertions.assertThat;
         "src/test/resources/features/Test3.feature",
         "src/test/resources/features/Test1.feature",
         "src/test/resources/features/Test2.feature",
-        "src/test/resources/features/Test1.feature"
 })
-@FeatureExecutionParams(
-        order = FeatureBuilder.PRESERVE_ORDER,
-        allowDuplicates = FeatureBuilder.ALLOW_DUPLICATED_FEATURES
+@FeatureExecutionOrder(
+        order = FeatureBuilder.PRESERVE_ORDER
 )
-public class FeatureExecutionParamsIT extends BaseGTest {
+public class FeatureExecutionOrderIT extends BaseGTest {
 
     @Test
-    public void checkExecutionOrderAndRepeatedFeatures() {
+    public void checkExecutionOrder() {
         List<String> reference = Arrays.asList("file:src/test/resources/features/Test.feature", "file:src/test/resources/features/Test3.feature",
-                "file:src/test/resources/features/Test1.feature", "file:src/test/resources/features/Test2.feature", "file:src/test/resources/features/Test1.feature");
+                "file:src/test/resources/features/Test1.feature", "file:src/test/resources/features/Test2.feature");
 
         Object[][] scenarios = cucumberRunner.provideScenarios();
         List<String> uris = Arrays.stream(scenarios).map(scenario -> ((PickleEventWrapper)scenario[0]).getPickleEvent().uri).collect(Collectors.toList());
 
-        assertThat(reference.equals(uris)).as("Executed features do not match with the expected.").isTrue();
+        assertThat(reference.equals(uris)).as("Feature execution order does not match with the expected one.").isTrue();
     }
 
     @AfterClass(alwaysRun = true)
@@ -62,5 +60,3 @@ public class FeatureExecutionParamsIT extends BaseGTest {
         cucumberRunner.finish();
     }
 }
-
-

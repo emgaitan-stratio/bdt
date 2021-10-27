@@ -68,11 +68,9 @@ public abstract class BaseGTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
 
         FeatureExecutionOrder annotationOrder =  this.getClass().getAnnotation(FeatureExecutionOrder.class);
-        System.setProperty(FeatureBuilder.FEATURE_EXECUTION_ORDER_KEY, annotationOrder != null ? annotationOrder.order() : "");
-
         FeatureExecutionParams annotationParams  =  this.getClass().getAnnotation(FeatureExecutionParams.class);
         System.setProperty(FeatureBuilder.DUPLICATED_FEATURES_KEY, annotationParams != null ? annotationParams.allowDuplicates() : "");
-        System.setProperty(FeatureBuilder.FEATURE_EXECUTION_ORDER_KEY, annotationParams != null ? annotationParams.order() : "");
+        System.setProperty(FeatureBuilder.FEATURE_EXECUTION_ORDER_KEY, annotationParams != null ? annotationParams.order() : (annotationOrder != null ? annotationOrder.order() : ""));
 
         cucumberRunner = new CucumberRunner(this.getClass());
     }
