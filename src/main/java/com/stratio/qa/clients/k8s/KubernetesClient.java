@@ -773,6 +773,16 @@ public class KubernetesClient {
     }
 
     /**
+     * kubectl delete statefulset mystatefulset
+     *
+     * @param statefulset   Statefulset to delete
+     * @param namespace Namespace
+     */
+    public void deleteStatefulset(String statefulset, String namespace) {
+        k8sClient.apps().statefulSets().inNamespace(namespace).withName(statefulset).delete();
+    }
+
+    /**
      * kubectl delete service myservice
      *
      * @param label     label filter witch has persistent volume claims to delete
