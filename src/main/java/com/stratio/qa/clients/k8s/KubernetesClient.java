@@ -266,12 +266,12 @@ public class KubernetesClient {
         try {
             String centralConfigJson = getConfigMap("command-center-config", "keos-cct").getData().get("central-config.json");
 
+            obtainJSONInfoAndExpose(commonspec, centralConfigJson, "$.admin_fqdn", "KEOS_FQDN", null);
+
             obtainJSONInfoAndExpose(commonspec, centralConfigJson, "$.eos.dockerRegistry", "DOCKER_REGISTRY", null);
             obtainJSONInfoAndExpose(commonspec, centralConfigJson, "$.eos.proxyAccessPointURL", "KEOS_ACCESS_POINT", null);
 
-            //obtainJSONInfoAndExpose(commonspec, centralConfigJson, "$.globals.sso.ssoTenantDefault", "KEOS_TENANT", null);
-            // TODO Review KEOS_TENANT, in configmap value is NONE
-            ThreadProperty.set("KEOS_TENANT", "keos");
+            obtainJSONInfoAndExpose(commonspec, centralConfigJson, "$.globals.sso.ssoTenantDefault", "KEOS_TENANT", null);
 
             obtainJSONInfoAndExpose(commonspec, centralConfigJson, "$.globals.kerberos.realm", "KEOS_REALM", null);
             obtainJSONInfoAndExpose(commonspec, centralConfigJson, "$.globals.kerberos.kdcHost", "KDC_HOST", null);
