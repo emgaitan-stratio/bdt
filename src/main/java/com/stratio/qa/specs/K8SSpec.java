@@ -405,25 +405,37 @@ public class K8SSpec extends BaseGSpec {
         }
     }
 
-    @When("^I execute '(.+?)' command in pod with name '(.+?)' in namespace '(.+?)'( in container '(.*?)')?( and save it in environment variable '(.+?)')?( and save it in file '(.*?)')?$")
-    public void runCommandInPod(String command, String name, String namespace, String container, String envVar, String fileName) throws Exception {
-        String result = commonspec.kubernetesClient.execCommand(name, namespace, container, command.split("\n| "));
+    @When("^I execute '(.+?)' command in pod with name '(.+?)' in namespace '(.+?)'( in container '(.*?)')?( and save it in environment variable '(.+?)')?( and save stderr in environment variable '(.+?)')?( and save it in file '(.*?)')?( and save stderr in file '(.*?)')?$")
+    public void runCommandInPod(String command, String name, String namespace, String container, String envVar, String errEnvVar, String fileName, String errFileName) throws Exception {
+        Map<String, String> result = commonspec.kubernetesClient.execCommand(name, namespace, container, command.split("\n| "));
         if (envVar != null) {
-            ThreadProperty.set(envVar, result);
+            ThreadProperty.set(envVar, result.get("stdout"));
+        }
+        if (errEnvVar != null) {
+            ThreadProperty.set(errEnvVar, result.get("stderr"));
         }
         if (fileName != null) {
-            writeInFile(result, fileName);
+            writeInFile(result.get("stdout"), fileName);
+        }
+        if (errFileName != null) {
+            writeInFile(result.get("stderr"), errFileName);
         }
     }
 
-    @When("^I execute the command defined in datatable in pod with name '(.+?)' in namespace '(.+?)'( in container '(.*?)')?( and save it in environment variable '(.+?)')?( and save it in file '(.*?)')?:$")
-    public void runCommandInPodDatatable(String name, String namespace, String container, String envVar, String fileName, DataTable dataTable) throws Exception {
-        String result = commonspec.kubernetesClient.execCommand(name, namespace, container, dataTable.asList().toArray(new String[0]));
+    @When("^I execute the command defined in datatable in pod with name '(.+?)' in namespace '(.+?)'( in container '(.*?)')?( and save it in environment variable '(.+?)')?( and save stderr in environment variable '(.+?)')?( and save it in file '(.*?)')?( and save stderr in file '(.*?)')?:$")
+    public void runCommandInPodDatatable(String name, String namespace, String container, String envVar, String errEnvVar, String fileName, String errFileName, DataTable dataTable) throws Exception {
+        Map<String, String> result = commonspec.kubernetesClient.execCommand(name, namespace, container, dataTable.asList().toArray(new String[0]));
         if (envVar != null) {
-            ThreadProperty.set(envVar, result);
+            ThreadProperty.set(envVar, result.get("stdout"));
+        }
+        if (errEnvVar != null) {
+            ThreadProperty.set(errEnvVar, result.get("stderr"));
         }
         if (fileName != null) {
-            writeInFile(result, fileName);
+            writeInFile(result.get("stdout"), fileName);
+        }
+        if (errFileName != null) {
+            writeInFile(result.get("stderr"), errFileName);
         }
     }
 

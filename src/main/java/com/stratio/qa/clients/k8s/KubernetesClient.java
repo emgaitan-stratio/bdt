@@ -676,9 +676,10 @@ public class KubernetesClient {
      * @param container Container of Pod
      * @throws InterruptedException
      */
-    public String execCommand(String pod, String namespace, String container, String[] command) throws InterruptedException {
+    public Map<String, String> execCommand(String pod, String namespace, String container, String[] command) throws InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayOutputStream error = new ByteArrayOutputStream();
+        Map<String, String> result = new HashMap<String, String>();
         execLatch = new CountDownLatch(1);
         ExecWatch execWatch;
         if (container == null) {
@@ -703,7 +704,11 @@ public class KubernetesClient {
         }
         logger.debug("Exec Output: {} ", out);
         execWatch.close();
-        return out.toString();
+
+        result.put("stdout", out.toString());
+        result.put("stderr", error.toString());
+
+        return result;
     }
 
     /**
