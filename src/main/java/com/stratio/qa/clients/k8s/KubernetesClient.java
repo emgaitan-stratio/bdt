@@ -21,6 +21,7 @@ import com.stratio.qa.specs.CommandExecutionSpec;
 import com.stratio.qa.specs.CommonG;
 import com.stratio.qa.specs.FileSpec;
 import com.stratio.qa.utils.ThreadProperty;
+import io.cucumber.datatable.DataTable;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition;
 import io.fabric8.kubernetes.api.model.apps.*;
@@ -1114,6 +1115,17 @@ public class KubernetesClient {
         configMapAux.setData(configMapData);
         k8sClient.configMaps().inNamespace(namespace).withName(configMapName).replace(configMapAux);
     }
+
+    public void addValuesInConfigMap(String configMapName, String namespace, DataTable variables) {
+        Map<String, String> configMapData = getConfigMap(configMapName, namespace).getData();
+        for (int i = 0; i < variables.cells().size(); i++) {
+            configMapData.put(variables.cells().get(i).get(0), variables.cells().get(i).get(1));
+        }
+        ConfigMap configMapAux = getConfigMap(configMapName, namespace);
+        configMapAux.setData(configMapData);
+        k8sClient.configMaps().inNamespace(namespace).withName(configMapName).replace(configMapAux);
+    }
+
 
     /**
      * Get a replicaset

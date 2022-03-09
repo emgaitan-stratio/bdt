@@ -659,6 +659,11 @@ public class K8SSpec extends BaseGSpec {
         commonspec.kubernetesClient.addValueInConfigMap(cmName, namespace, cmKey, cmValue);
     }
 
+    @When("^I add/modify variables in configmap with name '(.+?)' in namespace '(.+?)':$")
+    public void addOrModifyMultipleConfigmap(String cmName, String namespace, DataTable variables) {
+        commonspec.kubernetesClient.addValuesInConfigMap(cmName, namespace, variables);
+    }
+
     @When("^I update k8s deployment with id '(.+?)' in namespace '(.+?)' for container '(.+?)' with environment variables:$")
     public void updateAppEnvs(String deploymentName, String namespace, String containerName, DataTable modifications) throws Exception {
 
