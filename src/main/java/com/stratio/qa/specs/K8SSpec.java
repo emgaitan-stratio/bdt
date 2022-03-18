@@ -671,7 +671,7 @@ public class K8SSpec extends BaseGSpec {
 
         assertThat(container).as("Container " + containerName + " not found for deployment " + deploymentName + " in namespace " + namespace);
 
-        List<EnvVar> envVars = container.getEnv();
+        List<EnvVar> envVars = new ArrayList<>(new LinkedHashSet<>(container.getEnv()));
 
         List<List<String>> datatable = modifications.asLists(String.class);
         datatable.forEach(entry -> {

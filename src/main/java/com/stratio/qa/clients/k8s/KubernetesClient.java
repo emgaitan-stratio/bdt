@@ -1679,9 +1679,7 @@ public class KubernetesClient {
         List<Container> containers = deployment.getSpec().getTemplate().getSpec().getContainers();
         containers.forEach(container -> {
             if (container.getName().equals(containerName)) {
-                List<EnvVar> envVars = container.getEnv();
-                envVars.addAll(envVarsList);
-                container.setEnv(envVars);
+                container.setEnv(envVarsList);
             }
         });
 
