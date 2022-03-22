@@ -677,9 +677,10 @@ public class KubernetesClient {
      * @param container Container of Pod
      * @throws InterruptedException
      */
-    public Map<String, String> execCommand(String pod, String namespace, String container, String[] command) throws InterruptedException {
+    public Map<String, String> execCommand(String pod, String namespace, String container, String[] command) throws InterruptedException, Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayOutputStream error = new ByteArrayOutputStream();
+        ByteArrayOutputStream errorChannel = new ByteArrayOutputStream();
         Map<String, String> result = new HashMap<String, String>();
         execLatch = new CountDownLatch(1);
         ExecWatch execWatch;
@@ -687,6 +688,7 @@ public class KubernetesClient {
             execWatch = k8sClient.pods().inNamespace(namespace).withName(pod)
                     .writingOutput(out)
                     .writingError(error)
+                    .writingErrorChannel(errorChannel)
                     .usingListener(new MyPodExecListener())
                     .exec(command);
 
@@ -695,6 +697,7 @@ public class KubernetesClient {
                     .inContainer(container)
                     .writingOutput(out)
                     .writingError(error)
+                    .writingErrorChannel(errorChannel)
                     .usingListener(new MyPodExecListener())
                     .exec(command);
 
@@ -706,6 +709,11 @@ public class KubernetesClient {
         logger.debug("Exec Output: {} ", out);
         execWatch.close();
 
+        JSONObject errorJSON = new JSONObject(errorChannel.toString());
+
+        if (errorJSON.get("status").toString().matches("Failure")) {
+            throw new Exception("Command exit code is other than zero: " + errorJSON.get("message").toString());
+        }
         result.put("stdout", out.toString());
         result.put("stderr", error.toString());
 
