@@ -16,18 +16,14 @@ hose {
         ['MONGODB': [
            'image': 'stratio/mongo:3.0.4',
 	       'healthcheck': 27017]],
-//        ['ELASTICSEARCH': [
-//             'image': 'elasticsearch:7.4.2',
-//             'sleep': 600,
-//             'healthcheck': 9200,
-//             'resources': ['limits': ['memory': "2Gi"]],
-//             'env': ['xpack.security.enabled=false',
-//                     'http.host=%%OWNHOSTNAME',
-//                     'transport.host=%%OWNHOSTNAME',
-//                     'cluster.name=elasticsearch',
-//                     'discovery.type=single-node']
-//             ]
-//        ],
+        ['ELASTIC': [
+                'image': 'amazon/opendistro-for-elasticsearch:1.13.2',
+                'sleep': 600,
+                'healthcheck': 9200,
+                'resources': ['limits': ['memory': "2Gi"]],
+                'env': ['discovery.type=single-node', 'opendistro_security.disabled=true']
+            ]
+            ],
         ['CASSANDRA': [
            'image': 'stratio/cassandra-lucene-index:3.0.7.3',
            'volumes':[
@@ -82,7 +78,7 @@ hose {
 	    | -DFORCE_BROWSER=%%CHROME
         | -DMONGO_HOST=%%MONGODB
         | -DCASSANDRA_HOST=%%CASSANDRA
-        | -DES_NODE=%%ELASTICSEARCH
+        | -DES_NODE=%%ELASTIC
         | -DES_CLUSTER=elasticsearch
         | -DZOOKEEPER_HOSTS=%%ZOOKEEPER:2181
         | -DSECURIZED_ZOOKEEPER=false

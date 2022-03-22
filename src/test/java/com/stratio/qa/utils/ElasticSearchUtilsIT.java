@@ -38,113 +38,113 @@ public class ElasticSearchUtilsIT {
 
     private ElasticSearchUtils es_utils;
 
-//    @BeforeMethod
-//    public void setSettingsTest() {
-//        es_utils = new ElasticSearchUtils();
-//        LinkedHashMap<String, Object> settings_map = new LinkedHashMap<String, Object>();
-//        settings_map.put("cluster.name", System.getProperty("ES_CLUSTER", "elasticsearch"));
-//        es_utils.setSettings(settings_map);
-//        assertThat(es_utils.getSettings().get("cluster.name")).as("Non empty Exception list on boot").isEqualTo(System
-//                .getProperty("ES_CLUSTER", "elasticsearch"));
-//    }
+    @BeforeMethod
+    public void setSettingsTest() {
+        es_utils = new ElasticSearchUtils();
+        LinkedHashMap<String, Object> settings_map = new LinkedHashMap<String, Object>();
+        settings_map.put("cluster.name", System.getProperty("ES_CLUSTER", "elasticsearch"));
+        es_utils.setSettings(settings_map);
+        assertThat(es_utils.getSettings().get("cluster.name")).as("Non empty Exception list on boot").isEqualTo(System
+                .getProperty("ES_CLUSTER", "elasticsearch"));
+    }
 
-//    @Test
-//    public void connectTest() throws IOException {
-//        es_utils.connect();
-//        assertThat(es_utils.getClient().info(RequestOptions.DEFAULT).getClusterName()).isNotNull();
-//        es_utils.getClient().close();
-//    }
-//
-//    @Test
-//    public void createIndexTest() throws UnknownHostException {
-//        es_utils.connect();
-//        if (es_utils.indexExists("testindex")) {
-//            es_utils.dropSingleIndex("testindex");
-//        }
-//        es_utils.createSingleIndex("testindex");
-//        assertThat(es_utils.indexExists("testindex")).isTrue();
-//    }
-//
-//    @Test
-//    public void dropIndexTest() throws IOException {
-//        es_utils.connect();
-//        if (!es_utils.indexExists("testindex")) {
-//            es_utils.createSingleIndex("testindex");
-//        }
-//        es_utils.dropSingleIndex("testindex");
-//        assertThat(es_utils.indexExists("testindex")).isFalse();
-//        es_utils.getClient().close();
-//    }
-//
-//    @Test
-//    public void dropAllIndexTest() throws IOException {
-//        es_utils.connect();
-//        if (!es_utils.indexExists("testindex")) {
-//            es_utils.createSingleIndex("testindex");
-//        }
-//        es_utils.dropAllIndexes();
-//        assertThat(es_utils.indexExists("testindex")).isFalse();
-//        es_utils.getClient().close();
-//    }
-//
-//    @Test
-//    public void indexDocument() throws UnknownHostException, IOException {
-//        es_utils.connect();
-//        if (es_utils.indexExists("testindex")) {
-//            es_utils.dropSingleIndex("testindex");
-//        }
-//        es_utils.createSingleIndex("testindex");
-//        XContentBuilder document = jsonBuilder()
-//                .startObject()
-//                .field("ident", 1)
-//                .field("name", "test")
-//                .field("money", 10.2)
-//                .field("new", false).endObject();
-//        try {
-//            es_utils.indexDocument("testindex",  "1", document);
-//            Thread.sleep(2000);
-//            List<JSONObject> results = es_utils.searchSimpleFilterElasticsearchQuery("testindex",
-//                    "ident", "1",
-//                    "equals");
-//            assertThat(results.size()).isEqualTo(1);
-//            JSONObject result = results.get(0);
-//            assertThat(result.getInt("ident")).isEqualTo(1);
-//            assertThat(result.getString("name")).isEqualTo("test");
-//            assertThat(result.getDouble("money")).isEqualTo(10.2);
-//            assertThat(result.getBoolean("new")).isEqualTo(false);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    public void deleteDocument() throws UnknownHostException, IOException {
-//        es_utils.connect();
-//        if (es_utils.indexExists("testindex")) {
-//            es_utils.dropSingleIndex("testindex");
-//        }
-//        es_utils.createSingleIndex("testindex");
-//        XContentBuilder document = jsonBuilder()
-//                .startObject()
-//                .field("ident", 1)
-//                .field("name", "test")
-//                .field("money", 10.2)
-//                .field("new", false).endObject();
-//        try {
-//            es_utils.indexDocument("testindex",  "1", document);
-//            Thread.sleep(2000);
-//            List<JSONObject> results = es_utils.searchSimpleFilterElasticsearchQuery("testindex",
-//                    "ident", "1",
-//                    "equals");
-//            assertThat(results.size()).isEqualTo(1);
-//            es_utils.deleteDocument("testindex",  "1");
-//            Thread.sleep(2000);
-//            List<JSONObject> results2 = es_utils.searchSimpleFilterElasticsearchQuery("testindex",
-//                    "ident", "1",
-//                    "equals");
-//            assertThat(results2.size()).isEqualTo(0);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//    }
+    @Test
+    public void connectTest() throws IOException {
+        es_utils.connect();
+        assertThat(es_utils.getClient().info(RequestOptions.DEFAULT).getClusterName()).isNotNull();
+        es_utils.getClient().close();
+    }
+
+    @Test
+    public void createIndexTest() throws UnknownHostException {
+        es_utils.connect();
+        if (es_utils.indexExists("testindex")) {
+            es_utils.dropSingleIndex("testindex");
+        }
+        es_utils.createSingleIndex("testindex");
+        assertThat(es_utils.indexExists("testindex")).isTrue();
+    }
+
+    @Test
+    public void dropIndexTest() throws IOException {
+        es_utils.connect();
+        if (!es_utils.indexExists("testindex")) {
+            es_utils.createSingleIndex("testindex");
+        }
+        es_utils.dropSingleIndex("testindex");
+        assertThat(es_utils.indexExists("testindex")).isFalse();
+        es_utils.getClient().close();
+    }
+
+    @Test
+    public void dropAllIndexTest() throws IOException {
+        es_utils.connect();
+        if (!es_utils.indexExists("testindex")) {
+            es_utils.createSingleIndex("testindex");
+        }
+        es_utils.dropAllIndexes();
+        assertThat(es_utils.indexExists("testindex")).isFalse();
+        es_utils.getClient().close();
+    }
+
+    @Test
+    public void indexDocument() throws UnknownHostException, IOException {
+        es_utils.connect();
+        if (es_utils.indexExists("testindex")) {
+            es_utils.dropSingleIndex("testindex");
+        }
+        es_utils.createSingleIndex("testindex");
+        XContentBuilder document = jsonBuilder()
+                .startObject()
+                .field("ident", 1)
+                .field("name", "test")
+                .field("money", 10.2)
+                .field("new", false).endObject();
+        try {
+            es_utils.indexDocument("testindex",  "1", document);
+            Thread.sleep(2000);
+            List<JSONObject> results = es_utils.searchSimpleFilterElasticsearchQuery("testindex",
+                    "ident", "1",
+                    "equals");
+            assertThat(results.size()).isEqualTo(1);
+            JSONObject result = results.get(0);
+            assertThat(result.getInt("ident")).isEqualTo(1);
+            assertThat(result.getString("name")).isEqualTo("test");
+            assertThat(result.getDouble("money")).isEqualTo(10.2);
+            assertThat(result.getBoolean("new")).isEqualTo(false);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
+    public void deleteDocument() throws UnknownHostException, IOException {
+        es_utils.connect();
+        if (es_utils.indexExists("testindex")) {
+            es_utils.dropSingleIndex("testindex");
+        }
+        es_utils.createSingleIndex("testindex");
+        XContentBuilder document = jsonBuilder()
+                .startObject()
+                .field("ident", 1)
+                .field("name", "test")
+                .field("money", 10.2)
+                .field("new", false).endObject();
+        try {
+            es_utils.indexDocument("testindex",  "1", document);
+            Thread.sleep(2000);
+            List<JSONObject> results = es_utils.searchSimpleFilterElasticsearchQuery("testindex",
+                    "ident", "1",
+                    "equals");
+            assertThat(results.size()).isEqualTo(1);
+            es_utils.deleteDocument("testindex",  "1");
+            Thread.sleep(2000);
+            List<JSONObject> results2 = es_utils.searchSimpleFilterElasticsearchQuery("testindex",
+                    "ident", "1",
+                    "equals");
+            assertThat(results2.size()).isEqualTo(0);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 }
