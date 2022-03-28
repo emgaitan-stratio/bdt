@@ -677,7 +677,7 @@ public class KubernetesClient {
      * @param container Container of Pod
      * @throws InterruptedException
      */
-    public Map<String, String> execCommand(String pod, String namespace, String container, String[] command) throws InterruptedException, Exception {
+    public Map<String, String> execCommand(String pod, String namespace, String container, Integer timeout, String[] command) throws InterruptedException, Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayOutputStream error = new ByteArrayOutputStream();
         ByteArrayOutputStream errorChannel = new ByteArrayOutputStream();
@@ -702,7 +702,7 @@ public class KubernetesClient {
                     .exec(command);
 
         }
-        boolean latchTerminationStatus = execLatch.await(30, TimeUnit.SECONDS);
+        boolean latchTerminationStatus = execLatch.await(timeout != null ? timeout : 30, TimeUnit.SECONDS);
         if (!latchTerminationStatus) {
             logger.warn("Latch could not terminate within specified time");
         }
