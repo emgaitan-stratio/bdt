@@ -36,6 +36,7 @@ import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.extended.run.RunConfigBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
 import okhttp3.Response;
+import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -677,7 +678,7 @@ public class KubernetesClient {
      * @param container Container of Pod
      * @throws InterruptedException
      */
-    public Map<String, String> execCommand(String pod, String namespace, String container, Integer timeout, String[] command) throws InterruptedException, Exception {
+    public Map<String, String> execCommand(String pod, String namespace, String container, Integer timeout, String[] command, String failureReason) throws InterruptedException, Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayOutputStream error = new ByteArrayOutputStream();
         ByteArrayOutputStream errorChannel = new ByteArrayOutputStream();
@@ -711,8 +712,11 @@ public class KubernetesClient {
 
         JSONObject errorJSON = new JSONObject(errorChannel.toString());
 
-        if (errorJSON.get("status").toString().matches("Failure")) {
+        if (failureReason == null && errorJSON.get("status").toString().matches("Failure")) {
             throw new Exception("Command exit code is other than zero: " + errorJSON.get("message").toString());
+        } else if (failureReason != null) {
+            logger.debug("Command exit code is other than zero: {}", errorJSON.get("message"));
+            Assertions.assertThat(errorJSON.get("message")).isEqualTo(failureReason);
         }
         result.put("stdout", out.toString());
         result.put("stderr", error.toString());
