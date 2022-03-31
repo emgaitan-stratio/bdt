@@ -716,7 +716,7 @@ public class KubernetesClient {
             throw new Exception("Command exit code is other than zero: " + errorJSON.get("message").toString());
         } else if (failureReason != null) {
             logger.debug("Command exit code is other than zero: {}", errorJSON.get("message"));
-            Assertions.assertThat(errorJSON.get("message")).isEqualTo(failureReason);
+            Assertions.assertThat(errorJSON.get("reason")).isEqualTo(failureReason);
         }
         result.put("stdout", out.toString());
         result.put("stderr", error.toString());
