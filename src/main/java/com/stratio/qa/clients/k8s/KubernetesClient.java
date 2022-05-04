@@ -1576,21 +1576,41 @@ public class KubernetesClient {
         k8sClient.autoscaling().v1().horizontalPodAutoscalers().inNamespace(namespace).withName(name).edit().editSpec().withMinReplicas(minReplicas).withMaxReplicas(maxReplicas).endSpec().done();
     }
 
-    public void copyFileToPod(String podName, String namespace, String filePath, String destinationPath) {
+    public void copyFileToPod(String podName, String namespace, String container, String filePath, String destinationPath) {
         File local = new File(filePath);
         if (local.isDirectory()) {
-            k8sClient.pods().inNamespace(namespace).withName(podName).dir(destinationPath).upload(Paths.get(filePath));
+            if (container == null) {
+                k8sClient.pods().inNamespace(namespace).withName(podName)
+                        .dir(destinationPath)
+                        .upload(Paths.get(filePath));
+            } else {
+                k8sClient.pods().inNamespace(namespace).withName(podName).inContainer(container)
+                        .dir(destinationPath)
+                        .upload(Paths.get(filePath));
+            }
         } else {
-            k8sClient.pods().inNamespace(namespace).withName(podName).file(destinationPath).upload(Paths.get(filePath));
+            if (container == null) {
+                k8sClient.pods().inNamespace(namespace).withName(podName)
+                        .file(destinationPath)
+                        .upload(Paths.get(filePath));
+            } else {
+                k8sClient.pods().inNamespace(namespace).withName(podName).inContainer(container)
+                        .file(destinationPath)
+                        .upload(Paths.get(filePath));
+            }
         }
     }
 
     public void copyFileFromPod(String podName, String namespace, String filePath, String destinationPath) {
         File local = new File(destinationPath);
         if (local.isDirectory()) {
-            k8sClient.pods().inNamespace(namespace).withName(podName).dir(filePath).copy(Paths.get(destinationPath));
+            k8sClient.pods().inNamespace(namespace).withName(podName)
+                    .dir(filePath)
+                    .copy(Paths.get(destinationPath));
         } else {
-            k8sClient.pods().inNamespace(namespace).withName(podName).file(filePath).copy(Paths.get(destinationPath));
+            k8sClient.pods().inNamespace(namespace).withName(podName)
+                    .file(filePath)
+                    .copy(Paths.get(destinationPath));
         }
     }
 
