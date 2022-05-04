@@ -1954,7 +1954,7 @@ public class CCTSpec extends BaseGSpec {
     @When("^I( force)? create '(certificate|keytab|password|password_nouser|password_custom)' '(.+?)' using deploy-api (with|without) parameters( path '(.+?)')?( cn '(.+?)')?( name '(.+?)')?( alt '(.+?)')?( organization '(.+?)')?( principal '(.+?)')?( realm '(.+?)')?( user '(.+?)')?( password '(.+?)')?( customPasswordContentFile '(.+?)')?$")
     public void createSecret(String force, String secretType, String secret, String withOrWithout, String path, String cn, String name, String alt, String organizationName, String principal, String realm, String user, String password, String customPasswordContentFile) throws Exception {
         if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
-            createSecretKeos(force, secretType, secret, withOrWithout, path, cn, name, alt, organizationName, principal, realm, user, password, customPasswordContentFile);
+            createSecretKeos(force, secretType, secret, null, withOrWithout, path, cn, name, alt, organizationName, principal, realm, user, password, customPasswordContentFile);
         } else {
             String baseUrl = "/service/" + ThreadProperty.get("deploy_api_id") + "/secrets";
             String secretTypeAux;
@@ -2000,7 +2000,7 @@ public class CCTSpec extends BaseGSpec {
 
     @Deprecated
     public void createSecretKeos(String force, String secretType, String secret, String withOrWithout, String path, String cn, String name, String alt, String organizationName, String principal, String realm, String user, String password) throws Exception {
-        createSecretKeos(force, secretType, secret, withOrWithout, path, cn, name, alt, organizationName, principal, realm, user, password, null);
+        createSecretKeos(force, secretType, secret, null, withOrWithout, path, cn, name, alt, organizationName, principal, realm, user, password, null);
     }
 
     /**
@@ -2021,8 +2021,8 @@ public class CCTSpec extends BaseGSpec {
      * @param password
      * @throws Exception
      */
-    @When("^I( force)? create '(certificate|keytab|password|password_nouser)' '(.+?)' using CCT (with|without) parameters( path '(.+?)')?( cn '(.+?)')?( name '(.+?)')?( alt '(.+?)')?( organization '(.+?)')?( principal '(.+?)')?( realm '(.+?)')?( user '(.+?)')?( password '(.+?)')?( customPasswordContentFile '(.+?)')?$")
-    public void createSecretKeos(String force, String secretType, String secret, String withOrWithout, String path, String cn, String name, String alt, String organizationName, String principal, String realm, String user, String password, String customPasswordContentFile) throws Exception {
+    @When("^I( force)? create '(certificate|keytab|password|password_nouser)' '(.+?)'( in tenant '(.+?)')? using CCT (with|without) parameters( path '(.+?)')?( cn '(.+?)')?( name '(.+?)')?( alt '(.+?)')?( organization '(.+?)')?( principal '(.+?)')?( realm '(.+?)')?( user '(.+?)')?( password '(.+?)')?( customPasswordContentFile '(.+?)')?$")
+    public void createSecretKeos(String force, String secretType, String secret, String tenant, String withOrWithout, String path, String cn, String name, String alt, String organizationName, String principal, String realm, String user, String password, String customPasswordContentFile) throws Exception {
         String baseUrl = ThreadProperty.get("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH") + "/v1/secrets";
         String secretTypeAux;
         String secretTypeK8s;
@@ -2033,7 +2033,7 @@ public class CCTSpec extends BaseGSpec {
 
         switch (secretType) {
             case "certificate":
-                urlParams = getCertificateUrlParams(secret, path, cn, name, alt, organizationName);
+                urlParams = getCertificateUrlParams(secret, path, cn, name, alt, organizationName) + "&tenant=" + (tenant != null ? tenant : "keos");
                 secretTypeAux = "certificates";
                 secretTypeK8s = "certificates";
                 break;
