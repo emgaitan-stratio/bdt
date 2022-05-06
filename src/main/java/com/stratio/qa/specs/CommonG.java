@@ -2585,6 +2585,37 @@ public class CommonG {
         }
     }
 
+    public void connectToCustomDatabase(String database, String jdbcConnection, String user, String password) throws Exception {
+        String driver;
+        switch (database) {
+            case "oracle":
+                driver = "oracle.jdbc.OracleDriver";
+                break;
+            case "db2":
+                driver = "com.ibm.db2.jcc.DB2Driver";
+                break;
+            case "sqlserver":
+                driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+                break;
+            case "saphana":
+                driver = "com.sap.db.jdbc.Driver";
+                break;
+            default:
+                driver = "unknown";
+        }
+
+        logger.info("Connecting to {} using driver {}", jdbcConnection, driver);
+        try {
+            Class.forName(driver);
+            JDBCConnection.setConnection(DriverManager.getConnection(jdbcConnection, user, password));
+        } catch (SQLException se) {
+            // log the exception
+            this.getLogger().error(se.getMessage());
+            // re-throw the exception
+            throw se;
+        }
+    }
+
     public void setCCTConnection(String tenantOrig, String loginInfo) throws Exception {
         if (ThreadProperty.get("EOS_ACCESS_POINT") == null && ThreadProperty.get("KEOS_OAUTH2_PROXY_HOST") == null) {
             fail("KEOS_OAUTH2_PROXY_HOST and EOS_ACCESS_POINT variable are not set. Check @keos / @dcos annotation is working properly.");
