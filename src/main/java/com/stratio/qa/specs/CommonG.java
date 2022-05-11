@@ -32,6 +32,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 import com.ning.http.client.Realm;
 import com.ning.http.client.Realm.AuthScheme;
 import com.ning.http.client.Response;
@@ -689,7 +690,8 @@ public class CommonG {
         Integer statusCode = response.getStatusCode();
         String httpResponse = response.getResponseBody();
         List<Cookie> cookies = response.getCookies();
-        this.response = new HttpResponse(statusCode, httpResponse, cookies);
+        FluentCaseInsensitiveStringsMap headers = response.getHeaders();
+        this.response = new HttpResponse(statusCode, httpResponse, cookies, headers);
     }
 
     /**
@@ -1853,8 +1855,8 @@ public class CommonG {
             List<List<String>> expectedResultList = expectedResults.cells();
             //Check size
             assertThat(expectedResultList.size() - 1).overridingErrorMessage(
-                    "Expected number of columns to be" + (expectedResultList.size() - 1)
-                            + "but was " + previousElasticsearchResults.size())
+                            "Expected number of columns to be" + (expectedResultList.size() - 1)
+                                    + "but was " + previousElasticsearchResults.size())
                     .isEqualTo(previousElasticsearchResults.size());
             List<String> columnNames = expectedResultList.get(0);
             for (int i = 0; i < previousElasticsearchResults.size(); i++) {
