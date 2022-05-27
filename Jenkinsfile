@@ -5,7 +5,8 @@ hose {
     DEVTIMEOUT = 30
     RELEASETIMEOUT = 30
     BUILDTOOL = 'maven'
-    BUILDTOOL_IMAGE = "stratio/qa-builder:0.1.2"
+    BUILDTOOL_IMAGE = "stratio/qa-builder:0.2.0"
+    DEPLOYONPRS = true
 
     ITSERVICES = [
         ['ZOOKEEPER': [
