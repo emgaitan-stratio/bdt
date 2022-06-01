@@ -1939,6 +1939,10 @@ public class CommonG {
         this.commandResult = commandResult;
     }
 
+    public String getCommandResultError() {
+        return commandResultError;
+    }
+
     public String getRestProtocol() {
         return restProtocol;
     }
