@@ -255,10 +255,10 @@ public class RestSpec extends BaseGSpec {
             // Retrieve data
             String retrievedData = commonspec.retrieveData(baseData, type);
             // Generate request
-            response = commonspec.generateRequest(requestType, false, user, password, endPoint, retrievedData, type, "");
+            response = commonspec.generateRequest(requestType, false, user, password, endPoint, retrievedData, type);
         } else {
             // Generate request
-            response = commonspec.generateRequest(requestType, false, user, password, endPoint, "", type, "");
+            response = commonspec.generateRequest(requestType, false, user, password, endPoint, "", type);
         }
 
         // Save response

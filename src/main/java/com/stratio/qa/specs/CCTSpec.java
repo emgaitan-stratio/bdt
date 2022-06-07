@@ -16,6 +16,8 @@
 
 package com.stratio.qa.specs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.ning.http.client.Response;
 import com.stratio.qa.assertions.Assertions;
 import com.stratio.qa.models.cct.deployApi.DeployedApp;
@@ -2098,34 +2100,82 @@ public class CCTSpec extends BaseGSpec {
      */
     @When("^I delete '(certificate|keytab|password)' '(.+?)'( located in path '(.+?)')?$")
     public void removeSecret(String secretType, String secret, String path) throws Exception {
-        String baseUrl;
+        String baseUrl = "/service/" + ThreadProperty.get("deploy_api_id") + "/secrets";
         if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
-            baseUrl = ThreadProperty.get("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH") + "/v1/secrets";
+            removeSecretKeos(secretType, secret, path);
         } else {
-            baseUrl = "/service/" + ThreadProperty.get("deploy_api_id") + "/secrets";
-        }
-        String secretTypeAux;
+            String secretTypeAux;
 
+            // Set REST connection
+            commonspec.setCCTConnection(null, null);
+
+            switch (secretType) {
+                case "certificate":
+                    secretTypeAux = "certificates";
+                    break;
+                case "keytab":
+                    secretTypeAux = "kerberos";
+                    break;
+                case "password":
+                    secretTypeAux = "passwords";
+                    break;
+                default:
+                    secretTypeAux = "default";
+            }
+            String pathAux = path != null ? path.replaceAll("/", "%2F") + "%2F" + secret : "%2Fuserland%2F" + secretTypeAux + "%2F" + secret;
+            restSpec.sendRequestNoDataTable("DELETE", baseUrl + "?path=" + pathAux, null, null, null);
+            restSpec.sendRequestNoDataTable("GET", baseUrl + "?path=" + pathAux, null, null, null);
+            restSpec.assertResponseStatusLength(404, null, null);
+        }
+    }
+
+    public void removeSecretKeos(String secretType, String secret, String path) throws Exception {
+        String url = ThreadProperty.get("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH") + "/v1/jobs/RemoveSecret";
         // Set REST connection
         commonspec.setCCTConnection(null, null);
-
-        switch (secretType) {
-            case "certificate":
-                secretTypeAux = "certificates";
-                break;
-            case "keytab":
-                secretTypeAux = "kerberos";
-                break;
-            case "password":
-                secretTypeAux = "passwords";
-                break;
-            default:
-                secretTypeAux = "default";
+        if (path == null) {
+            switch (secretType) {
+                case "certificate":
+                    path = "/userland/certificates";
+                    break;
+                case "keytab":
+                    path = "/userland/kerberos";
+                    break;
+                case "password":
+                    path = "/userland/passwords";
+                    break;
+                default:
+                    throw new Exception("Invalid secret type: " + secretType);
+            }
         }
-        String pathAux = path != null ? path.replaceAll("/", "%2F") + "%2F" + secret : "%2Fuserland%2F" + secretTypeAux + "%2F" + secret;
-        restSpec.sendRequestNoDataTable("DELETE", baseUrl + "?path=" + pathAux, null, null, null);
-        restSpec.sendRequestNoDataTable("GET", baseUrl + "?path=" + pathAux, null, null, null);
-        restSpec.assertResponseStatusLength(404, null, null);
+        ObjectMapper objectMapper = new YAMLMapper();
+        Map<String, Object> cctJob = new HashMap<>();
+        cctJob.put("name", "RemoveSecret");
+        cctJob.put("label", "RemoveSecret");
+        Map<String, Object> inputs = new HashMap<>();
+        inputs.put("name", "vaultPath");
+        inputs.put("type", "string");
+        inputs.put("value", path + "/" + secret);
+        List<Object> inputsList = new ArrayList<>();
+        inputsList.add(inputs);
+        cctJob.put("inputs", inputsList);
+        Map<String, Object> tasks = new HashMap<>();
+        tasks.put("type", "secret/delete");
+        tasks.put("secretType", secretType);
+        tasks.put("path", "${vaultPath}");
+        if (secretType.equals("certificate")) {
+            tasks.put("crtSuffix", "crt");
+            tasks.put("keySuffix", "key");
+        }
+        List<Object> tasksList = new ArrayList<>();
+        tasksList.add(tasks);
+        cctJob.put("tasks", tasksList);
+        // write YAML file
+        File removeJobFile = new File("target/test-classes/removeSecretCCTJob.yaml");
+        objectMapper.writeValue(new File("target/test-classes/removeSecretCCTJob.yaml"), cctJob);
+        restSpec.sendRequestNoDataTable("POST", url, null, "removeSecretCCTJob.yaml", "yaml");
+        restSpec.assertResponseStatusLength(200, null, null);
+        removeJobFile.delete();
     }
 
     /**
