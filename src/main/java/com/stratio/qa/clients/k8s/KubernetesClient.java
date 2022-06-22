@@ -32,6 +32,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.LocalPortForward;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.extended.run.RunConfigBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
@@ -1147,6 +1148,21 @@ public class KubernetesClient {
      */
     public String describeConfigMap(String configMapName, String namespace) {
         return getConfigMap(configMapName, namespace).getData().toString();
+    }
+
+    public void createOrReplaceConfigMap(String configMapName, String namespace, String key, String value) {
+        Resource<ConfigMap, DoneableConfigMap> configMapResource = k8sClient.configMaps().inNamespace(namespace).withName(configMapName);
+        ConfigMapBuilder configMapBuilder = new ConfigMapBuilder().withNewMetadata().withName(configMapName).endMetadata().addToData(key, value);
+        configMapResource.createOrReplace(configMapBuilder.build());
+    }
+
+    public void createOrReplaceConfigMap(String configMapName, String namespace, DataTable variables) {
+        Resource<ConfigMap, DoneableConfigMap> configMapResource = k8sClient.configMaps().inNamespace(namespace).withName(configMapName);
+        ConfigMapBuilder configMapBuilder = new ConfigMapBuilder().withNewMetadata().withName(configMapName).endMetadata();
+        for (int i = 0; i < variables.cells().size(); i++) {
+            configMapBuilder.addToData(variables.cells().get(i).get(0), variables.cells().get(i).get(1));
+        }
+        configMapResource.createOrReplace(configMapBuilder.build());
     }
 
     /**

@@ -654,6 +654,22 @@ public class K8SSpec extends BaseGSpec {
         commonspec.kubernetesClient.createClusterRoleBinding(name, namespace, clusterRole, serviceAccount);
     }
 
+    @When("^I create configmap with name '(.+?)' in namespace '(.+?)' with key '(.+?)' and value '(.+?)'$")
+    public void createOrReplaceConfigMap(String cmName, String namespace, String cmKey, String cmValue) {
+        commonspec.kubernetesClient.createOrReplaceConfigMap(cmName, namespace, cmKey, cmValue);
+    }
+
+    @When("^I create configmap with name '(.+?)' in namespace '(.+?)' with key '(.+?)' and value defined in file '(.+?)'$")
+    public void createOrReplaceConfigMapValueFile(String cmName, String namespace, String cmKey, String file) {
+        String cmValue = commonspec.retrieveData(file, "yaml");
+        commonspec.kubernetesClient.createOrReplaceConfigMap(cmName, namespace, cmKey, cmValue);
+    }
+
+    @When("^I create configmap with name '(.+?)' in namespace '(.+?)' and values:$")
+    public void createOrReplaceConfigMap(String cmName, String namespace, DataTable variables) {
+        commonspec.kubernetesClient.createOrReplaceConfigMap(cmName, namespace, variables);
+    }
+
     @When("^I add/modify variable '(.+?)' with value '(.+?)' in configmap with name '(.+?)' in namespace '(.+?)'$")
     public void addOrModifyConfigmap(String cmKey, String cmValue, String cmName, String namespace) {
         commonspec.kubernetesClient.addValueInConfigMap(cmName, namespace, cmKey, cmValue);
