@@ -1584,12 +1584,12 @@ public class CCTSpec extends BaseGSpec {
      * @param modifications : modifications to perform in the deployed json
      * @throws Exception
      */
-    @Given("^I update service '(.+?)'( in folder '(.+?)')?( in tenant '(.+?)')?( in namespace '(.+?)')?( based on version '(.+?)')?( based on json '(.+?)')?( based on schema '(.+?)')? with:$")
-    public void updateCCTService(String serviceName, String folder, String tenant, String namespace, String version, String jsonFile, String schema, DataTable modifications) throws Exception {
+    @Given("^I update service '(.+?)'( in folder '(.+?)')?( in tenant '(.+?)')?( in namespace '(.+?)')?( based on version '(.+?)')?( based on json '(.+?)')?( based on schema '(.+?)')?( without checking the previous state)? with:$")
+    public void updateCCTService(String serviceName, String folder, String tenant, String namespace, String version, String jsonFile, String schema, String withoutCheckPrevState, DataTable modifications) throws Exception {
         if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
             updateCCTServiceKeos(serviceName, jsonFile, schema, tenant, namespace, modifications);
         } else {
-            updateCCTServiceDcos(serviceName, folder, tenant, version, jsonFile, modifications);
+            updateCCTServiceDcos(serviceName, folder, tenant, version, jsonFile, modifications, withoutCheckPrevState == null);
         }
     }
 
@@ -1663,7 +1663,7 @@ public class CCTSpec extends BaseGSpec {
         //TODO Check application status in KEOS
     }
 
-    private void updateCCTServiceDcos(String serviceName, String folder, String tenant, String version, String jsonFile, DataTable modifications) throws Exception {
+    private void updateCCTServiceDcos(String serviceName, String folder, String tenant, String version, String jsonFile, DataTable modifications, boolean checkServiceStatus) throws Exception {
         Assert.assertNotNull(ThreadProperty.get("deploy_api_id"), "deploy_api_id variable is not set. Check deploy-api is installed and @dcos annotation is working properly.");
 
         // obtain service name
@@ -1686,11 +1686,13 @@ public class CCTSpec extends BaseGSpec {
         }
 
         // Check service is running
-        try {
-            checkServiceStatus(10, 1, service, null, "running");
-        } catch (Exception e) {
-            logger.error("Service: " + service + " is not deployed in cluster.");
-            throw e;
+        if (checkServiceStatus) {
+            try {
+                checkServiceStatus(10, 1, service, null, "running");
+            } catch (Exception e) {
+                logger.error("Service: " + service + " is not deployed in cluster.");
+                throw e;
+            }
         }
 
         String deployedJson = "";
@@ -1749,9 +1751,9 @@ public class CCTSpec extends BaseGSpec {
      * @param version     : version of the deployed service
      * @throws Exception
      */
-    @Given("^I update service '(.+?)'( in folder '(.+?)')?( in tenant '(.+?)')?( in namespace '(.+?)')?( based on version '(.+?)')?( based on json '(.+?)')?$")
-    public void updateCCTService(String serviceName, String folder, String tenant, String namespace, String version, String jsonFile) throws Exception {
-        updateCCTService(serviceName, folder, tenant, namespace, version, jsonFile, null, null);
+    @Given("^I update service '(.+?)'( in folder '(.+?)')?( in tenant '(.+?)')?( in namespace '(.+?)')?( based on version '(.+?)')?( based on json '(.+?)')?( without checking the previous state)?$")
+    public void updateCCTService(String serviceName, String folder, String tenant, String namespace, String version, String jsonFile, String withoutCheckPrevState) throws Exception {
+        updateCCTService(serviceName, folder, tenant, namespace, version, jsonFile, null, withoutCheckPrevState, null);
     }
 
     @Given("^I upload descriptor for service '(.+?)', model '(.+?)' version '(.+?)' based on '(.+?)'$")
