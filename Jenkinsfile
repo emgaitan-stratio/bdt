@@ -2,8 +2,8 @@
 
 hose {
     EMAIL = 'qa'
-    DEVTIMEOUT = 30
-    RELEASETIMEOUT = 30
+    DEVTIMEOUT = 60
+    RELEASETIMEOUT = 60
     BUILDTOOL = 'maven'
     BUILDTOOL_IMAGE = "stratio/qa-builder:0.2.2"
     BUILDTOOL_MEMORY_LIMIT = '2Gi'

@@ -71,7 +71,30 @@ public class RestTest {
         commong.setResponse("GET", (Response) response.get());
 
         RestSpec rest = new RestSpec(commong);
-        rest.saveResponseInEnvironmentVariableFile("envVar", "file.txt");
+        rest.saveResponseInEnvironmentVariableFile("envVar", "file.txt", null);
+
+        assertThat(ThreadProperty.get("envVar")).as("Unexpected content in thread variable").contains("Responsibles: QA");
+
+        File tempDirectory = new File(String.valueOf(System.getProperty("user.dir") + "/target/test-classes/"));
+        String absolutePathFile = tempDirectory.getAbsolutePath() + "/file.txt";
+
+        Assertions.assertThat(new File(absolutePathFile).exists());
+        new File(absolutePathFile).delete();
+    }
+
+    @Test
+    public void testsaveResponseInEnvironmentVariableFileUsingUTF8Encoding() throws Exception {
+        ThreadProperty.set("class", this.getClass().getCanonicalName());
+        CommonG commong = new CommonG();
+        commong.setClient(new AsyncHttpClient());
+        commong.setRestHost("jenkins.int.stratio.com");
+        commong.setRestPort(":80");
+
+        Future<Response> response = commong.generateRequest("GET", false, null, null, "/job/AI/job/NightlyForward/", null, "string");
+        commong.setResponse("GET", (Response) response.get());
+
+        RestSpec rest = new RestSpec(commong);
+        rest.saveResponseInEnvironmentVariableFile("envVar", "file.txt", "UTF-8");
 
         assertThat(ThreadProperty.get("envVar")).as("Unexpected content in thread variable").contains("Responsibles: QA");
 
@@ -94,7 +117,29 @@ public class RestTest {
         commong.setResponse("GET", (Response) response.get());
 
         RestSpec rest = new RestSpec(commong);
-        rest.saveResponseInEnvironmentVariableFile("envVar", null);
+        rest.saveResponseInEnvironmentVariableFile("envVar", null, null);
+
+        assertThat(ThreadProperty.get("envVar")).as("Unexpected content in thread variable").contains("Responsibles: QA");
+
+        File tempDirectory = new File(String.valueOf(System.getProperty("user.dir") + "/target/test-classes/"));
+        String absolutePathFile = tempDirectory.getAbsolutePath() + "/file.txt";
+
+        Assertions.assertThat(new File(absolutePathFile).exists()).isFalse();
+    }
+
+    @Test
+    public void testsaveResponseInEnvironmentVariableFileNoFileUsingUTF8Encoding() throws Exception {
+        ThreadProperty.set("class", this.getClass().getCanonicalName());
+        CommonG commong = new CommonG();
+        commong.setClient(new AsyncHttpClient());
+        commong.setRestHost("jenkins.int.stratio.com");
+        commong.setRestPort(":80");
+
+        Future<Response> response = commong.generateRequest("GET", false, null, null, "/job/AI/job/NightlyForward/", null, "string");
+        commong.setResponse("GET", (Response) response.get());
+
+        RestSpec rest = new RestSpec(commong);
+        rest.saveResponseInEnvironmentVariableFile("envVar", null, "UTF-8");
 
         assertThat(ThreadProperty.get("envVar")).as("Unexpected content in thread variable").contains("Responsibles: QA");
 
