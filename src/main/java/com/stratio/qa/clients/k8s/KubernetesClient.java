@@ -23,9 +23,11 @@ import com.stratio.qa.specs.FileSpec;
 import com.stratio.qa.utils.ThreadProperty;
 import io.cucumber.datatable.DataTable;
 import io.fabric8.kubernetes.api.model.*;
-import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import io.fabric8.kubernetes.api.model.apps.*;
-import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.api.model.autoscaling.v1.HorizontalPodAutoscaler;
+import io.fabric8.kubernetes.api.model.autoscaling.v1.HorizontalPodAutoscalerSpec;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.rbac.*;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -36,7 +38,6 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.extended.run.RunConfigBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
-import okhttp3.Response;
 import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -230,7 +231,7 @@ public class KubernetesClient {
         }
 
         // Get ingress hosts
-        for (Ingress ingress : k8sClient.extensions().ingresses().inNamespace("keos-auth").list().getItems()) {
+        for (Ingress ingress : k8sClient.network().v1().ingresses().inNamespace("keos-auth").list().getItems()) {
             String varName = null;
             switch (ingress.getMetadata().getName()) {
                 case "sis":
@@ -266,7 +267,7 @@ public class KubernetesClient {
             ThreadProperty.set("cct-paas-services_id", "cct-paas-services");
         }
 
-        Ingress gosecIngress = k8sClient.extensions().ingresses().inNamespace("keos-core").withName("gosec-management-ui").get();
+        Ingress gosecIngress = k8sClient.network().v1().ingresses().inNamespace("keos-core").withName("gosec-management-ui").get();
         if (gosecIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec")) {
             ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", "/gosec");
         }
@@ -274,29 +275,29 @@ public class KubernetesClient {
             ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", "/gosec/ui");
         }
         ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct");
-        Ingress cctIngress = k8sClient.extensions().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct_ui_id")).get();
+        Ingress cctIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct_ui_id")).get();
         if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/" + ThreadProperty.get("cct_ui_id"))) {
             ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/" + ThreadProperty.get("cct_ui_id"));
         } else if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/ui")) {
             ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct/ui");
         }
         ThreadProperty.set("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH", "/" + ThreadProperty.get("cct-orchestrator_id"));
-        Ingress cctOrchestratorIngress = k8sClient.extensions().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-orchestrator_id")).get();
+        Ingress cctOrchestratorIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-orchestrator_id")).get();
         if (cctOrchestratorIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/" + ThreadProperty.get("cct-orchestrator_id"))) {
             ThreadProperty.set("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH", "/cct/" + ThreadProperty.get("cct-orchestrator_id"));
         }
         ThreadProperty.set("KEOS_CCT_UNIVERSE_SERVICE_INGRESS_PATH", "/" + ThreadProperty.get("cct-universe_id"));
-        Ingress cctUniverseServiceIngress = k8sClient.extensions().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-universe_id")).get();
+        Ingress cctUniverseServiceIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-universe_id")).get();
         if (cctUniverseServiceIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/" + ThreadProperty.get("cct-universe_id"))) {
             ThreadProperty.set("KEOS_CCT_UNIVERSE_SERVICE_INGRESS_PATH", "/cct/" + ThreadProperty.get("cct-universe_id"));
         }
         ThreadProperty.set("KEOS_CCT_APPLICATIONS_QUERY_SERVICE_INGRESS_PATH", "/" + ThreadProperty.get("cct-applications-query_id"));
-        Ingress cctApplicationsQueryServiceIngress = k8sClient.extensions().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-applications-query_id")).get();
+        Ingress cctApplicationsQueryServiceIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-applications-query_id")).get();
         if (cctApplicationsQueryServiceIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/" + ThreadProperty.get("cct-applications-query_id"))) {
             ThreadProperty.set("KEOS_CCT_APPLICATIONS_QUERY_SERVICE_INGRESS_PATH", "/cct/" + ThreadProperty.get("cct-applications-query_id"));
         }
         ThreadProperty.set("KEOS_GOSEC_BAAS_INGRESS_PATH", "/baas");
-        Ingress gosecBaasIngress = k8sClient.extensions().ingresses().inNamespace("keos-core").withName("gosec-management-baas").get();
+        Ingress gosecBaasIngress = k8sClient.network().v1().ingresses().inNamespace("keos-core").withName("gosec-management-baas").get();
         if (gosecBaasIngress != null && gosecBaasIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec/baas")) {
             ThreadProperty.set("KEOS_GOSEC_BAAS_INGRESS_PATH", "/gosec/baas");
         }
@@ -474,17 +475,15 @@ public class KubernetesClient {
      * @param namespace Namespace
      * @return String with custom resource in json format
      */
-    public String describeCustomResourceJson(String name, String nameItem, String namespace) throws JsonProcessingException {
+    public String describeCustomResourceJson(String name, String nameItem, String namespace) {
 
-        CustomResourceDefinition crd = k8sClient.customResourceDefinitions().withName(name).get();
+        CustomResourceDefinition crd = k8sClient.apiextensions().v1().customResourceDefinitions().withName(name).get();
         CustomResourceDefinitionContext crdContext = CustomResourceDefinitionContext.fromCrd(crd);
 
-        Map<String, Object> list = k8sClient.customResource(crdContext).list(namespace);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) list.get("items");
-        for (Map<String, Object> customResource : items) {
-            Map<String, Object> metadata = (Map<String, Object>) customResource.get("metadata");
-            if (metadata.get("name").equals(nameItem)) {
-                return new JSONObject(customResource).toString();
+        List<GenericKubernetesResource> kubernetesResourceList = k8sClient.genericKubernetesResources(crdContext).inNamespace(namespace).list().getItems();
+        for (GenericKubernetesResource genericKubernetesResource : kubernetesResourceList) {
+            if (genericKubernetesResource.getMetadata().getName().equals(nameItem)) {
+                return new JSONObject(genericKubernetesResource).toString();
             }
         }
         return null;
@@ -532,8 +531,8 @@ public class KubernetesClient {
                 .withScope(scope)
                 .withGroup(group)
                 .build();
-        Map<String, Object> myObject = k8sClient.customResource(customResourceDefinitionContext).load(new FileInputStream(file));
-        k8sClient.customResource(customResourceDefinitionContext).createOrReplace(namespace, myObject);
+        Resource<GenericKubernetesResource> genericKubernetesResource = k8sClient.genericKubernetesResources(customResourceDefinitionContext).inNamespace(namespace).load(new FileInputStream(file));
+        k8sClient.genericKubernetesResources(customResourceDefinitionContext).inNamespace(namespace).createOrReplace(genericKubernetesResource.get());
     }
 
     /**
@@ -544,15 +543,13 @@ public class KubernetesClient {
      * @param namespace
      */
     public String getCustomResource(String name, String namespace) throws IOException {
-        CustomResourceDefinition crd = k8sClient.customResourceDefinitions().withName(name).get();
+        CustomResourceDefinition crd = k8sClient.apiextensions().v1().customResourceDefinitions().withName(name).get();
         CustomResourceDefinitionContext crdContext = CustomResourceDefinitionContext.fromCrd(crd);
 
-        Map<String, Object> list = k8sClient.customResource(crdContext).list(namespace);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) list.get("items");
+        List<GenericKubernetesResource> kubernetesResourceList = k8sClient.genericKubernetesResources(crdContext).inNamespace(namespace).list().getItems();
         StringBuilder result = new StringBuilder();
-        for (Map<String, Object> customResource : items) {
-            Map<String, Object> metadata = (Map<String, Object>) customResource.get("metadata");
-            result.append(metadata.get("name")).append("\n");
+        for (GenericKubernetesResource genericKubernetesResource : kubernetesResourceList) {
+            result.append(genericKubernetesResource.getMetadata().getName()).append("\n");
         }
         return result.length() > 0 ? result.substring(0, result.length() - 1) : result.toString();
     }
@@ -566,21 +563,18 @@ public class KubernetesClient {
      * @return replicas number is ready
      */
     public Integer getReadyReplicasCustomResource(String name, String nameItem, String namespace) throws IOException {
-        CustomResourceDefinition crd = k8sClient.customResourceDefinitions().withName(name).get();
+        CustomResourceDefinition crd = k8sClient.apiextensions().v1().customResourceDefinitions().withName(name).get();
         CustomResourceDefinitionContext crdContext = CustomResourceDefinitionContext.fromCrd(crd);
 
-        Map<String, Object> list = k8sClient.customResource(crdContext).list(namespace);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) list.get("items");
-        StringBuilder result = new StringBuilder();
-        Integer replicas = 0;
-        for (Map<String, Object> customResource : items) {
-            Map<String, Object> metadata = (Map<String, Object>) customResource.get("metadata");
-            Map<String, Object> status = (Map<String, Object>) customResource.get("status");
-            if (metadata.get("name").equals(nameItem)) {
-                return Integer.valueOf(result.append(status.get("readyInstances")).toString().split("/")[0]);
+        List<GenericKubernetesResource> kubernetesResourceList = k8sClient.genericKubernetesResources(crdContext).inNamespace(namespace).list().getItems();
+        for (GenericKubernetesResource genericKubernetesResource : kubernetesResourceList) {
+            if (genericKubernetesResource.getMetadata().getName().equals(nameItem)) {
+                Map<String, Object> additionalProperties = genericKubernetesResource.getAdditionalProperties();
+                Map<String, Object> status = (Map<String, Object>) additionalProperties.get("status");
+                return Integer.valueOf(status.get("readyInstances").toString().split("/")[0]);
             }
         }
-        return replicas;
+        return 0;
     }
 
     /**
@@ -592,21 +586,19 @@ public class KubernetesClient {
      * @return global status
      */
     public String getGlobalStatusCustomResource(String name, String nameItem, String namespace) throws IOException {
-        CustomResourceDefinition crd = k8sClient.customResourceDefinitions().withName(name).get();
+        CustomResourceDefinition crd = k8sClient.apiextensions().v1().customResourceDefinitions().withName(name).get();
         CustomResourceDefinitionContext crdContext = CustomResourceDefinitionContext.fromCrd(crd);
 
-        Map<String, Object> list = k8sClient.customResource(crdContext).list(namespace);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) list.get("items");
-        StringBuilder result = new StringBuilder();
-        for (Map<String, Object> customResource : items) {
-            Map<String, Object> metadata = (Map<String, Object>) customResource.get("metadata");
-            Map<String, Object> status = (Map<String, Object>) customResource.get("status");
-            Map<String, Object> globalStatus = (Map<String, Object>) status.get("globalStatus");
-            if (metadata.get("name").equals(nameItem)) {
-                return result.append(globalStatus.get("status")).toString();
+        List<GenericKubernetesResource> kubernetesResourceList = k8sClient.genericKubernetesResources(crdContext).inNamespace(namespace).list().getItems();
+        for (GenericKubernetesResource genericKubernetesResource : kubernetesResourceList) {
+            if (genericKubernetesResource.getMetadata().getName().equals(nameItem)) {
+                Map<String, Object> additionalProperties = genericKubernetesResource.getAdditionalProperties();
+                Map<String, Object> status = (Map<String, Object>) additionalProperties.get("status");
+                Map<String, Object> globalStatus = (Map<String, Object>) status.get("globalStatus");
+                return globalStatus.get("status").toString();
             }
         }
-        return result.toString();
+        return "";
     }
 
     /**
@@ -618,21 +610,19 @@ public class KubernetesClient {
      * @return global status description
      */
     public String getGlobalStatusDescriptionCustomResource(String name, String nameItem, String namespace) throws IOException {
-        CustomResourceDefinition crd = k8sClient.customResourceDefinitions().withName(name).get();
+        CustomResourceDefinition crd = k8sClient.apiextensions().v1().customResourceDefinitions().withName(name).get();
         CustomResourceDefinitionContext crdContext = CustomResourceDefinitionContext.fromCrd(crd);
 
-        Map<String, Object> list = k8sClient.customResource(crdContext).list(namespace);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) list.get("items");
-        StringBuilder result = new StringBuilder();
-        for (Map<String, Object> customResource : items) {
-            Map<String, Object> metadata = (Map<String, Object>) customResource.get("metadata");
-            Map<String, Object> status = (Map<String, Object>) customResource.get("status");
-            Map<String, Object> globalStatus = (Map<String, Object>) status.get("globalStatus");
-            if (metadata.get("name").equals(nameItem)) {
-                return result.append(globalStatus.get("description")).toString();
+        List<GenericKubernetesResource> kubernetesResourceList = k8sClient.genericKubernetesResources(crdContext).inNamespace(namespace).list().getItems();
+        for (GenericKubernetesResource genericKubernetesResource : kubernetesResourceList) {
+            if (genericKubernetesResource.getMetadata().getName().equals(nameItem)) {
+                Map<String, Object> additionalProperties = genericKubernetesResource.getAdditionalProperties();
+                Map<String, Object> status = (Map<String, Object>) additionalProperties.get("status");
+                Map<String, Object> globalStatus = (Map<String, Object>) status.get("globalStatus");
+                return globalStatus.get("description").toString();
             }
         }
-        return result.toString();
+        return "";
     }
 
     /**
@@ -873,9 +863,9 @@ public class KubernetesClient {
      * @param namespace Namespace
      */
     public void deleteCustomResourceItem(String name, String nameItem, String namespace) throws IOException {
-        CustomResourceDefinition crd = k8sClient.customResourceDefinitions().withName(name).get();
+        CustomResourceDefinition crd = k8sClient.apiextensions().v1().customResourceDefinitions().withName(name).get();
         CustomResourceDefinitionContext crdContext = CustomResourceDefinitionContext.fromCrd(crd);
-        k8sClient.customResource(crdContext).delete(namespace, nameItem);
+        k8sClient.genericKubernetesResources(crdContext).inNamespace(namespace).withName(nameItem).delete();
     }
 
     /**
@@ -1151,18 +1141,16 @@ public class KubernetesClient {
     }
 
     public void createOrReplaceConfigMap(String configMapName, String namespace, String key, String value) {
-        Resource<ConfigMap, DoneableConfigMap> configMapResource = k8sClient.configMaps().inNamespace(namespace).withName(configMapName);
         ConfigMapBuilder configMapBuilder = new ConfigMapBuilder().withNewMetadata().withName(configMapName).endMetadata().addToData(key, value);
-        configMapResource.createOrReplace(configMapBuilder.build());
+        k8sClient.configMaps().inNamespace(namespace).withName(configMapName).createOrReplace(configMapBuilder.build());
     }
 
     public void createOrReplaceConfigMap(String configMapName, String namespace, DataTable variables) {
-        Resource<ConfigMap, DoneableConfigMap> configMapResource = k8sClient.configMaps().inNamespace(namespace).withName(configMapName);
         ConfigMapBuilder configMapBuilder = new ConfigMapBuilder().withNewMetadata().withName(configMapName).endMetadata();
         for (int i = 0; i < variables.cells().size(); i++) {
             configMapBuilder.addToData(variables.cells().get(i).get(0), variables.cells().get(i).get(1));
         }
-        configMapResource.createOrReplace(configMapBuilder.build());
+        k8sClient.configMaps().inNamespace(namespace).withName(configMapName).createOrReplace(configMapBuilder.build());
     }
 
     /**
@@ -1301,21 +1289,19 @@ public class KubernetesClient {
      * Get clusterrole
      *
      * @param name      clusterrole name
-     * @param namespace Namespace
      */
-    public ClusterRole getClusterRole(String name, String namespace) {
-        return k8sClient.rbac().clusterRoles().inNamespace(namespace).withName(name).get();
+    public ClusterRole getClusterRole(String name) {
+        return k8sClient.rbac().clusterRoles().withName(name).get();
     }
 
     /**
      * Get clusterrole list in selected namespace
      *
-     * @param namespace Namespace
      * @return clusterrole list
      */
-    public String getClusterRoleList(String namespace) {
+    public String getClusterRoleList() {
         StringBuilder result = new StringBuilder();
-        for (ClusterRole clusterRole : k8sClient.rbac().clusterRoles().inNamespace(namespace).list().getItems()) {
+        for (ClusterRole clusterRole : k8sClient.rbac().clusterRoles().list().getItems()) {
             result.append(clusterRole.getMetadata().getName()).append("\n");
         }
         return result.length() > 0 ? result.substring(0, result.length() - 1) : result.toString();
@@ -1325,32 +1311,29 @@ public class KubernetesClient {
      * kubectl describe clusterrole xxx -n namespace
      *
      * @param crName    clusterrole name
-     * @param namespace Namespace
      * @return String with clusterrole
      */
-    public String describeClusterRole(String crName, String namespace) throws JsonProcessingException {
-        return SerializationUtils.dumpAsYaml(getClusterRole(crName, namespace));
+    public String describeClusterRole(String crName) throws JsonProcessingException {
+        return SerializationUtils.dumpAsYaml(getClusterRole(crName));
     }
 
     /**
      * Get clusterrolebinding
      *
      * @param name      clusterrolebinding name
-     * @param namespace Namespace
      */
-    public ClusterRoleBinding getClusterRoleBinding(String name, String namespace) {
-        return k8sClient.rbac().clusterRoleBindings().inNamespace(namespace).withName(name).get();
+    public ClusterRoleBinding getClusterRoleBinding(String name) {
+        return k8sClient.rbac().clusterRoleBindings().withName(name).get();
     }
 
     /**
      * Get clusterrolebinding list in selected namespace
      *
-     * @param namespace Namespace
      * @return clusterrolebinding list
      */
-    public String getClusterRoleBindingList(String namespace) {
+    public String getClusterRoleBindingList() {
         StringBuilder result = new StringBuilder();
-        for (ClusterRoleBinding clusterRoleBinding : k8sClient.rbac().clusterRoleBindings().inNamespace(namespace).list().getItems()) {
+        for (ClusterRoleBinding clusterRoleBinding : k8sClient.rbac().clusterRoleBindings().list().getItems()) {
             result.append(clusterRoleBinding.getMetadata().getName()).append("\n");
         }
         return result.length() > 0 ? result.substring(0, result.length() - 1) : result.toString();
@@ -1360,11 +1343,10 @@ public class KubernetesClient {
      * kubectl describe clusterrolebinding xxx -n namespace
      *
      * @param crName    clusterrolebinding name
-     * @param namespace Namespace
      * @return String with clusterrolebinding
      */
-    public String describeClusterRoleBinding(String crName, String namespace) throws JsonProcessingException {
-        return SerializationUtils.dumpAsYaml(getClusterRoleBinding(crName, namespace));
+    public String describeClusterRoleBinding(String crName) throws JsonProcessingException {
+        return SerializationUtils.dumpAsYaml(getClusterRoleBinding(crName));
     }
 
     /**
@@ -1479,7 +1461,7 @@ public class KubernetesClient {
      */
     public String getCustomResourceDefinitionList() {
         StringBuilder result = new StringBuilder();
-        for (CustomResourceDefinition customResourceDefinition : k8sClient.customResourceDefinitions().list().getItems()) {
+        for (CustomResourceDefinition customResourceDefinition : k8sClient.apiextensions().v1().customResourceDefinitions().list().getItems()) {
             result.append(customResourceDefinition.getMetadata().getName()).append("\n");
         }
         return result.length() > 0 ? result.substring(0, result.length() - 1) : result.toString();
@@ -1521,7 +1503,7 @@ public class KubernetesClient {
      * @return Ingress
      */
     public Ingress getIngress(String name, String namespace) {
-        return k8sClient.extensions().ingresses().inNamespace(namespace).withName(name).get();
+        return k8sClient.network().v1().ingresses().inNamespace(namespace).withName(name).get();
     }
 
     /**
@@ -1532,7 +1514,7 @@ public class KubernetesClient {
      */
     public String getIngressList(String namespace) {
         StringBuilder result = new StringBuilder();
-        for (Ingress ingress : k8sClient.extensions().ingresses().inNamespace(namespace).list().getItems()) {
+        for (Ingress ingress : k8sClient.network().v1().ingresses().inNamespace(namespace).list().getItems()) {
             result.append(ingress.getMetadata().getName()).append("\n");
         }
         return result.length() > 0 ? result.substring(0, result.length() - 1) : result.toString();
@@ -1615,7 +1597,11 @@ public class KubernetesClient {
      * @param maxReplicas Max replicas
      */
     public void updateHorizontalAutoscaler(String namespace, String name, int maxReplicas) {
-        k8sClient.autoscaling().v1().horizontalPodAutoscalers().inNamespace(namespace).withName(name).edit().editSpec().withMaxReplicas(maxReplicas).endSpec().done();
+        HorizontalPodAutoscaler hpa = k8sClient.autoscaling().v1().horizontalPodAutoscalers().inNamespace(namespace).withName(name).get();
+        HorizontalPodAutoscalerSpec spec = hpa.getSpec();
+        spec.setMaxReplicas(maxReplicas);
+        hpa.setSpec(spec);
+        k8sClient.autoscaling().v1().horizontalPodAutoscalers().inNamespace(namespace).withName(name).createOrReplace(hpa);
     }
 
     /**
@@ -1626,7 +1612,12 @@ public class KubernetesClient {
      * @param maxReplicas Max replicas
      */
     public void updateHorizontalAutoscaler(String namespace, String name, int minReplicas, int maxReplicas) {
-        k8sClient.autoscaling().v1().horizontalPodAutoscalers().inNamespace(namespace).withName(name).edit().editSpec().withMinReplicas(minReplicas).withMaxReplicas(maxReplicas).endSpec().done();
+        HorizontalPodAutoscaler hpa = k8sClient.autoscaling().v1().horizontalPodAutoscalers().inNamespace(namespace).withName(name).get();
+        HorizontalPodAutoscalerSpec spec = hpa.getSpec();
+        spec.setMinReplicas(minReplicas);
+        spec.setMaxReplicas(maxReplicas);
+        hpa.setSpec(spec);
+        k8sClient.autoscaling().v1().horizontalPodAutoscalers().inNamespace(namespace).withName(name).createOrReplace(hpa);
     }
 
     public void copyFileToPod(String podName, String namespace, String container, String filePath, String destinationPath) {
@@ -1698,17 +1689,16 @@ public class KubernetesClient {
      * kubectl create clusterrole xxx --verb=get --verb=list --verb=watch --verb=create --verb=delete --resource=pods --resource=services --resource=configmaps --resource=secrets --namespace=<namespace>
      *
      * @param clusterRoleName
-     * @param namespace
      * @param resources
      * @param verbs
      * @param apiGroups
      */
-    public void createClusterRole(String clusterRoleName, String namespace, String resources, String verbs, String apiGroups) {
+    public void createClusterRole(String clusterRoleName, String resources, String verbs, String apiGroups) {
         String[] resourcesList = resources.split(",");
         String[] verbsList = verbs.split(",");
         String[] apiGroupsList = apiGroups != null ? apiGroups.split(",") : new String[]{""};
         PolicyRule policyRule = new PolicyRuleBuilder().addToApiGroups(apiGroupsList).addToResources(resourcesList).addToVerbs(verbsList).build();
-        k8sClient.rbac().clusterRoles().inNamespace(namespace).createOrReplace(new ClusterRoleBuilder().withRules(policyRule).withNewMetadata().withName(clusterRoleName).endMetadata().build());
+        k8sClient.rbac().clusterRoles().createOrReplace(new ClusterRoleBuilder().withRules(policyRule).withNewMetadata().withName(clusterRoleName).endMetadata().build());
     }
 
     /**
@@ -1716,18 +1706,17 @@ public class KubernetesClient {
      * kubectl create clusterrolebinding xxx --clusterrole=xxx --serviceaccount=<namespace>:<serviceaccount> --namespace=<namespace>
      *
      * @param clusterRoleBindingName
-     * @param namespace
      * @param clusterRole
      * @param serviceAccount
      */
-    public void createClusterRoleBinding(String clusterRoleBindingName, String namespace, String clusterRole, String serviceAccount) {
+    public void createClusterRoleBinding(String clusterRoleBindingName, String clusterRole, String serviceAccount) {
         Subject subject = new SubjectBuilder().withNewKind("ServiceAccount").withNewName(serviceAccount.split(":")[1]).withNewNamespace(serviceAccount.split(":")[0]).build();
-        k8sClient.rbac().clusterRoleBindings().inNamespace(namespace).createOrReplace(new ClusterRoleBindingBuilder().withNewRoleRef("", "ClusterRole", clusterRole).withSubjects(subject).withNewMetadata().withName(clusterRoleBindingName).endMetadata().build());
+        k8sClient.rbac().clusterRoleBindings().createOrReplace(new ClusterRoleBindingBuilder().withNewRoleRef("", "ClusterRole", clusterRole).withSubjects(subject).withNewMetadata().withName(clusterRoleBindingName).endMetadata().build());
     }
 
     private static class MyPodExecListener implements ExecListener {
         @Override
-        public void onOpen(Response response) {
+        public void onOpen() {
             getLogger().debug("K8S Shell was opened");
         }
 
@@ -1776,10 +1765,6 @@ public class KubernetesClient {
         deploymentSpec.setTemplate(templateSpec);
         deployment.setSpec(deploymentSpec);
 
-        k8sClient.apps().deployments().inNamespace(namespace).withName(deploymentName)
-                .edit()
-                .withNewSpecLike(deploymentSpec)
-                .endSpec()
-                .done();
+        k8sClient.apps().deployments().inNamespace(namespace).withName(deploymentName).edit().setSpec(deploymentSpec);
     }
 }

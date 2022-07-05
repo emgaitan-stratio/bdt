@@ -85,10 +85,10 @@ public class K8SSpec extends BaseGSpec {
                 response = commonspec.kubernetesClient.getSecretsList(namespace);
                 break;
             case "clusterroles":
-                response = commonspec.kubernetesClient.getClusterRoleList(namespace);
+                response = commonspec.kubernetesClient.getClusterRoleList();
                 break;
             case "clusterrolebindings":
-                response = commonspec.kubernetesClient.getClusterRoleBindingList(namespace);
+                response = commonspec.kubernetesClient.getClusterRoleBindingList();
                 break;
             case "statefulsets":
                 response = commonspec.kubernetesClient.getStateFulSetList(namespace);
@@ -156,10 +156,10 @@ public class K8SSpec extends BaseGSpec {
                 describeResponse = commonspec.kubernetesClient.describeSecret(name, namespace);
                 break;
             case "clusterrole":
-                describeResponse = commonspec.kubernetesClient.describeClusterRole(name, namespace);
+                describeResponse = commonspec.kubernetesClient.describeClusterRole(name);
                 break;
             case "clusterrolebinding":
-                describeResponse = commonspec.kubernetesClient.describeClusterRoleBinding(name, namespace);
+                describeResponse = commonspec.kubernetesClient.describeClusterRoleBinding(name);
                 break;
             case "statefulset":
                 describeResponse = commonspec.kubernetesClient.describeStateFulSet(name, namespace);
@@ -644,14 +644,14 @@ public class K8SSpec extends BaseGSpec {
         commonspec.kubernetesClient.createServiceAccount(name, namespace);
     }
 
-    @When("^I create cluster role with name '(.+?)' in namespace '(.+?)' with resources '(.+?)' and verbs '(.+?)'( and api groups '(.+?)')?$")
-    public void createClusterRole(String name, String namespace, String resources, String verbs, String apiGroups) {
-        commonspec.kubernetesClient.createClusterRole(name, namespace, resources, verbs, apiGroups);
+    @When("^I create cluster role with name '(.+?)' with resources '(.+?)' and verbs '(.+?)'( and api groups '(.+?)')?$")
+    public void createClusterRole(String name, String resources, String verbs, String apiGroups) {
+        commonspec.kubernetesClient.createClusterRole(name, resources, verbs, apiGroups);
     }
 
-    @When("^I create cluster role binding with name '(.+?)' in namespace '(.+?)' with ClusterRole '(.+?)' and ServiceAccount '(.+?)'$")
-    public void createClusterRole(String name, String namespace, String clusterRole, String serviceAccount) {
-        commonspec.kubernetesClient.createClusterRoleBinding(name, namespace, clusterRole, serviceAccount);
+    @When("^I create cluster role binding with name '(.+?)' with ClusterRole '(.+?)' and ServiceAccount '(.+?)'$")
+    public void createClusterRole(String name, String clusterRole, String serviceAccount) {
+        commonspec.kubernetesClient.createClusterRoleBinding(name, clusterRole, serviceAccount);
     }
 
     @When("^I create configmap with name '(.+?)' in namespace '(.+?)' with key '(.+?)' and value '(.+?)'$")

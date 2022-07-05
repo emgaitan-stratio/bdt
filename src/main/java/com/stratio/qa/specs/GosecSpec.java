@@ -1930,5 +1930,119 @@ public class GosecSpec extends BaseGSpec {
     }
 
 
+    @When("^I delete '(user|group)' '(.+?)' from role '(.+?)' in tenant '(.+?)'$")
+    public void deleteResourceInRole(String resource, String resourceId, String roleName, String tenantId) throws Exception {
+        String endPointGetAllUsers = "/service/gosec-identities-daas/identities/users";
+        String endPointGetAllGroups = "/service/gosec-identities-daas/identities/groups";
+        String endPointGetAllRoles = "/service/gosec-identities-daas/profiling/role?count=1&name=" + roleName + "&tid=" + tenantId;
+        String endPointRolePatch = "/service/gosec-identities-daas/profiling/role/bulk/identities?tid=" + tenantId;
+        String rid = "roleId";
+        Boolean content = false;
+        String select = "USERS";
+
+        assertThat(commonspec.getRestHost().isEmpty() || commonspec.getRestPort().isEmpty());
+        String uidOrGid = "uid";
+        String usersOrGroups = "users";
+        String endPointGosec = endPointGetAllUsers;
+        String usersOrGroupsIds = "uids";
+
+        if (resource.equals("group")) {
+            uidOrGid = "gid";
+            usersOrGroups = "groups";
+            usersOrGroupsIds = "gids";
+            endPointGosec = endPointGetAllGroups;
+            select = "GROUPS";
+        }
+
+        // Set REST connection
+        commonspec.setCCTConnection(null, null);
+
+        //GET role with provided name and tid
+        restSpec.sendRequestNoDataTable("GET", endPointGetAllRoles, null, null, null);
+        if (commonspec.getResponse().getStatusCode() == 200) {
+            //GET roleId - rid
+            commonspec.runLocalCommand("echo '" + commonspec.getResponse().getResponse() + "' | jq .profiles[0].rid | sed s/\\\"//g");
+            rid = commonspec.getCommandResult().trim();
+
+            if ((rid == null) || (rid.equals(""))) {
+                throw new Exception("Role" + " " + roleName + " doesn't exist in Gosec for tenant " + tenantId);
+            }
+            commonspec.getLogger().debug("RID obtenido--> {}", rid);
+
+            String endPointRole = "/service/gosec-identities-daas/profiling/role/" + rid + "?select=" + select;
+
+            //GET user/group
+            restSpec.sendRequestNoDataTable("GET", endPointGosec, null, null, null);
+            if ((commonspec.getResponse().getStatusCode() == 200) && ((commonspec.getResponse().getResponse().contains("\"" + uidOrGid + "\":\"" + resourceId + "\"")))) {
+                //GET role
+                restSpec.sendRequestNoDataTable("GET", endPointRole, null, null, null);
+                if (commonspec.getResponse().getStatusCode() == 200) {
+
+                    JsonObject jsonRoleInfo = new JsonObject(JsonValue.readHjson(commonspec.getResponse().getResponse()).asObject());
+                    // Get users/groups from role
+                    JsonArray jsonGroups = (JsonArray) jsonRoleInfo.get(usersOrGroups);
+                    // Get size of users/groups
+                    String[] stringGroups = new String[jsonGroups.size() + 1];
+                    // Create json for put
+                    JSONObject putObject = new JSONObject(commonspec.getResponse().getResponse());
+
+                    for (int i = 0; i < jsonGroups.size(); i++) {
+                        String jsonIds = ((JsonObject) jsonGroups.get(i)).getString(uidOrGid, "");
+
+                        if (jsonIds.equals(resourceId)) {
+                            commonspec.getLogger().debug("Deleting resource: {} from the role: {}", resourceId, roleName);
+                            content = true;
+                            break;
+                        } else {
+                            stringGroups[i] = jsonIds;
+                        }
+                    }
+
+                    if (!content) {
+                        commonspec.getLogger().warn("Resource: {} is not included in role: {} for tenant: {}", resourceId, roleName, tenantId);
+
+                    } else {
+                        // Include resourceId to stringDelete[]
+                        String[] stringDelete = new String[1];
+                        stringDelete[0] = resourceId;
+                        // Include rid to stringRids[]
+                        String[] stringRids = new String[1];
+                        stringRids[0] = rid;
+
+                        //PATCH object
+                        JSONObject patchObject = new JSONObject();
+                        patchObject.put(usersOrGroupsIds, stringDelete);
+                        patchObject.put("op", "delete");
+                        patchObject.put("rids", stringRids);
+
+                        commonspec.getLogger().warn("Json for PATCH request---> {}", patchObject);
+
+                        //Create json data with header cluster-owner included
+                        List<List<String>> rawData = Arrays.asList(
+                                Arrays.asList("cluster-owner", "HEADER", "true", "n/a")
+                        );
+                        DataTable gosecDataTable = DataTable.create(rawData);
+                        //Create file with json data
+                        writeInFile(patchObject.toString(), "filePatchProfiling.json");
+
+                        restSpec.sendRequest("PATCH", endPointRolePatch, null, "filePatchProfiling.json", "json", gosecDataTable);
+
+                        if (commonspec.getResponse().getStatusCode() != 200) {
+                            throw new Exception("Error deleting User/Group: " + resourceId + " in Role " + roleName + " - Status code: " + commonspec.getResponse().getStatusCode());
+                        }
+
+                    }
+                } else {
+                    throw new Exception("Role" + " " + roleName + " doesn't exist in Gosec for tenant " + tenantId);
+                }
+            } else {
+                throw new Exception(resource + " " + resourceId + " doesn't exist in Gosec");
+            }
+        } else {
+            throw new Exception("Role" + " " + roleName + " doesn't exist in Gosec for tenant " + tenantId);
+        }
+    }
+
+
 }
 
