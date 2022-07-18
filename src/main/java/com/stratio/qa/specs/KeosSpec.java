@@ -162,7 +162,7 @@ public class KeosSpec extends BaseGSpec {
         Assertions.assertThat(rules.exists()).as("File: " + universeFile + " does not exist.").isTrue();
 
         // Obtain endpoint
-        String endPointUpload = "/cct/cct-universe-service/v1/descriptors";
+        String endPointUpload = ThreadProperty.get("KEOS_CCT_UNIVERSE_SERVICE_INGRESS_PATH") + "/v1/descriptors";
 
         // Obtain URL
         String restURL = "https://" + System.getProperty("KEOS_CLUSTER_NAME") + ":443" + endPointUpload;
