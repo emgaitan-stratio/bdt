@@ -2043,6 +2043,20 @@ public class GosecSpec extends BaseGSpec {
         }
     }
 
-
+    @When("^I run '(partial|total)' ldap synchronizer$")
+    public void runLdapSynchronizer(String type) throws Exception {
+        String basePath = "/service/gosec-management-baas";
+        String endPoint = "/management/ldap/synchronize";
+        if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
+            basePath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
+        }
+        commonspec.setCCTConnection(null, null);
+        JSONObject jsonAsset = new JSONObject();
+        jsonAsset.put("type", type);
+        writeInFile(jsonAsset.toString(), "ldapSync.conf");
+        restSpec.sendRequestNoDataTable("POST", basePath + endPoint, null, "ldapSync.conf", "json");
+        assertThat(commonspec.getResponse().getStatusCode()).isEqualTo(201);
+        new File(System.getProperty("user.dir") + "/target/test-classes/ldapSync.conf").delete();
+    }
 }
 
