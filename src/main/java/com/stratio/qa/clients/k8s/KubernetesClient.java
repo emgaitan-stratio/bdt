@@ -1666,10 +1666,14 @@ public class KubernetesClient {
      * @param labelsMap
      */
     public void createNamespace(String namespaceName, Map<String, String> labelsMap) {
-        if (labelsMap != null) {
-            k8sClient.namespaces().createOrReplace(new NamespaceBuilder().withNewMetadata().withName(namespaceName).addToLabels(labelsMap).endMetadata().build());
+        if (k8sClient.namespaces().withName(namespaceName).get() == null) {
+            if (labelsMap != null) {
+                k8sClient.namespaces().create(new NamespaceBuilder().withNewMetadata().withName(namespaceName).addToLabels(labelsMap).endMetadata().build());
+            } else {
+                k8sClient.namespaces().create(new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
+            }
         } else {
-            k8sClient.namespaces().createOrReplace(new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
+            logger.warn("Namespace " + namespaceName + " already exists");
         }
     }
 
