@@ -1797,7 +1797,9 @@ public class GosecSpec extends BaseGSpec {
         commonspec.setCCTConnection(tenantOrig, tenantLoginInfo);
         // Get Key ID
         restSpec.sendRequestNoDataTable("GET", endPointGetKey, null, null, null);
-        commonspec.runLocalCommand("echo '" + commonspec.getResponse().getResponse() + "' | jq -cMr '.list[] | select(.name==\"" + keyName + "\")'");
+        writeInFile(commonspec.getResponse().getResponse(), "keyresponse.json");
+        commonspec.runLocalCommand("cat target/test-classes/keyresponse.json | jq -cMr '.list[] | select(.name==\"" + keyName + "\")'");
+        new File(System.getProperty("user.dir") + "/target/test-classes/keyresponse.json").delete();
         // Post Asset
         JSONObject jsonAsset = new JSONObject();
         jsonAsset.put("name", assetName);
