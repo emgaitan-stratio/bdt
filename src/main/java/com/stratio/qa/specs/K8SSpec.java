@@ -129,7 +129,7 @@ public class K8SSpec extends BaseGSpec {
         assertThat(commonspec.kubernetesClient.checkEventNamespace(not, namespace, type, name, reason, message)).as("There aren't event that contains the message " + message + " in namespace " + namespace).isTrue();
     }
 
-    @When("^I describe (pod|service|deployment|configmap|replicaset|serviceaccount|secret|clusterrole|clusterrolebinding|statefulset|role|rolebinding|ingress|persistentVolumeClaims) with name '(.+?)'( in namespace '(.+?)')?( in '(yaml|json)' format)?( and save it in environment variable '(.*?)')?( and save it in file '(.*?)')?$")
+    @When("^I describe (pod|service|deployment|configmap|replicaset|serviceaccount|secret|clusterrole|clusterrolebinding|statefulset|role|rolebinding|ingress|persistentVolumeClaims|job) with name '(.+?)'( in namespace '(.+?)')?( in '(yaml|json)' format)?( and save it in environment variable '(.*?)')?( and save it in file '(.*?)')?$")
     public void describeResource(String type, String name, String namespace, String format, String envVar, String fileName) throws Exception {
         String describeResponse;
         format = (format != null) ? format : "yaml";
@@ -175,6 +175,9 @@ public class K8SSpec extends BaseGSpec {
                 break;
             case "persistentVolumeClaims":
                 describeResponse = commonspec.kubernetesClient.describePersistentVolumeClaims(name, namespace);
+                break;
+            case "job":
+                describeResponse = commonspec.kubernetesClient.describeJobYaml(name, namespace);
                 break;
             default:
                 describeResponse = null;
@@ -488,7 +491,7 @@ public class K8SSpec extends BaseGSpec {
         assertThat(log).contains(expectedLog);
     }
 
-    @When("^I delete (pod|deployment|service|statefulset) with name '(.+?)' in namespace '(.+?)'$")
+    @When("^I delete (pod|deployment|service|statefulset|job|ingress|configmap|secret) with name '(.+?)' in namespace '(.+?)'$")
     public void deleteResource(String type, String name, String namespace) {
         switch (type) {
             case "pod":
@@ -502,6 +505,18 @@ public class K8SSpec extends BaseGSpec {
                 break;
             case "statefulset":
                 commonspec.kubernetesClient.deleteStatefulset(name, namespace);
+                break;
+            case "job":
+                commonspec.kubernetesClient.deleteJob(name, namespace);
+                break;
+            case "ingress":
+                commonspec.kubernetesClient.deleteIngress(name, namespace);
+                break;
+            case "configmap":
+                commonspec.kubernetesClient.deleteConfigMap(name, namespace);
+                break;
+            case "secret":
+                commonspec.kubernetesClient.deleteSecret(name, namespace);
                 break;
             default:
         }

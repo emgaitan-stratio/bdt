@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition
 import io.fabric8.kubernetes.api.model.apps.*;
 import io.fabric8.kubernetes.api.model.autoscaling.v1.HorizontalPodAutoscaler;
 import io.fabric8.kubernetes.api.model.autoscaling.v1.HorizontalPodAutoscalerSpec;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.rbac.*;
 import io.fabric8.kubernetes.client.Config;
@@ -1140,6 +1141,16 @@ public class KubernetesClient {
         return getConfigMap(configMapName, namespace).getData().toString();
     }
 
+    /**
+     * Delete configmap
+     *
+     * @param configMapName Config map name
+     * @param namespace     Namespace
+     */
+    public void deleteConfigMap(String configMapName, String namespace) {
+        k8sClient.configMaps().inNamespace(namespace).withName(configMapName).delete();
+    }
+
     public void createOrReplaceConfigMap(String configMapName, String namespace, String key, String value) {
         ConfigMapBuilder configMapBuilder = new ConfigMapBuilder().withNewMetadata().withName(configMapName).endMetadata().addToData(key, value);
         k8sClient.configMaps().inNamespace(namespace).withName(configMapName).createOrReplace(configMapBuilder.build());
@@ -1258,6 +1269,16 @@ public class KubernetesClient {
      */
     public Secret getSecret(String name, String namespace) {
         return k8sClient.secrets().inNamespace(namespace).withName(name).get();
+    }
+
+    /**
+     * Delete secret
+     *
+     * @param name      secret name
+     * @param namespace Namespace
+     */
+    public void deleteSecret(String name, String namespace) {
+        k8sClient.secrets().inNamespace(namespace).withName(name).delete();
     }
 
     /**
@@ -1507,6 +1528,16 @@ public class KubernetesClient {
     }
 
     /**
+     * Remove ingress
+     *
+     * @param name ingress name
+     * @param namespace namespace
+     */
+    public void deleteIngress(String name, String namespace) {
+        k8sClient.network().v1().ingresses().inNamespace(namespace).withName(name).delete();
+    }
+
+    /**
      * kubectl get ingress -n namespace
      *
      * @param namespace Namespace
@@ -1718,6 +1749,40 @@ public class KubernetesClient {
         k8sClient.rbac().clusterRoleBindings().createOrReplace(new ClusterRoleBindingBuilder().withNewRoleRef("", "ClusterRole", clusterRole).withSubjects(subject).withNewMetadata().withName(clusterRoleBindingName).endMetadata().build());
     }
 
+
+    /**
+     * Describe job in yaml format
+     *
+     * @param jobName Job name
+     * @param namespace Namespace
+     * @return String with job in yaml format
+     * @throws JsonProcessingException In any error
+     */
+    public String describeJobYaml(String jobName, String namespace) throws JsonProcessingException {
+        return SerializationUtils.dumpAsYaml(getJob(jobName, namespace));
+    }
+
+    /**
+     * Get job object
+     *
+     * @param jobName Job name
+     * @param namespace Namespace
+     * @return Job
+     */
+    public Job getJob(String jobName, String namespace) {
+        return k8sClient.batch().v1().jobs().inNamespace(namespace).withName(jobName).get();
+    }
+
+    /**
+     * kubectl delete job myjob
+     *
+     * @param job       Job to delete
+     * @param namespace Namespace
+     */
+    public void deleteJob(String job, String namespace) {
+        k8sClient.batch().v1().jobs().inNamespace(namespace).withName(job).delete();
+    }
+
     private static class MyPodExecListener implements ExecListener {
         @Override
         public void onOpen() {
@@ -1739,7 +1804,7 @@ public class KubernetesClient {
 
     public Container getContainer(String namespace, String deploymentName, String containerName) {
 
-        Container container = k8sClient.apps().deployments().inNamespace(namespace).withName(deploymentName)
+        return k8sClient.apps().deployments().inNamespace(namespace).withName(deploymentName)
                 .get()
                 .getSpec()
                 .getTemplate()
@@ -1747,8 +1812,6 @@ public class KubernetesClient {
                 .getContainers()
                 .stream().filter(c -> c.getName().equals(containerName))
                 .findFirst().orElse(null);
-
-        return container;
     }
 
     public void updateDeploymentEnvVars(List<EnvVar> envVarsList, String namespace, String deploymentName, String containerName) {
