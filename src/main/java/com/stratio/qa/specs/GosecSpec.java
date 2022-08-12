@@ -639,6 +639,11 @@ public class GosecSpec extends BaseGSpec {
         commonspec.setCCTConnection(null, null);
 
         String endPoint = "/service/gosec-identities-daas/identities/tenants";
+
+        if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
+            endPoint = "/gosec/identities/identities/tenants";
+        }
+
         String endPointResource = endPoint + "/" + tenantId;
         Integer expectedStatus = 201;
         assertThat(commonspec.getRestHost().isEmpty() || commonspec.getRestPort().isEmpty());
@@ -669,6 +674,11 @@ public class GosecSpec extends BaseGSpec {
         commonspec.setCCTConnection(null, null);
 
         String endPoint = "/service/gosec-identities-daas/identities/tenants";
+
+        if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
+            endPoint = "/gosec/identities/identities/tenants";
+        }
+
         String endPointResource = endPoint + "/" + tenantId;
         Integer expectedStatus = 204;
         assertThat(commonspec.getRestHost().isEmpty() || commonspec.getRestPort().isEmpty());
@@ -700,6 +710,13 @@ public class GosecSpec extends BaseGSpec {
         String endPointGetAllUsers = "/service/gosec-identities-daas/identities/users";
         String endPointGetAllGroups = "/service/gosec-identities-daas/identities/groups";
         String endPointTenant = "/service/gosec-identities-daas/identities/tenants/" + tenantId;
+
+        if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
+            endPointGetAllUsers = "/gosec/identities/identities/users";
+            endPointGetAllGroups = "/gosec/identities/identities/groups";
+            endPointTenant = "/gosec/identities/identities/tenants/" + tenantId;
+        }
+
         assertThat(commonspec.getRestHost().isEmpty() || commonspec.getRestPort().isEmpty());
         String uidOrGid = "uid";
         String uidOrGidTenant = "uids";
@@ -1829,6 +1846,14 @@ public class GosecSpec extends BaseGSpec {
         String endPointGetAllGroups = "/service/gosec-identities-daas/identities/groups";
         String endPointGetAllRoles = "/service/gosec-identities-daas/profiling/role?count=1&name=" + roleName + "&tid=" + tenantId;
         String endPointRolePatch = "/service/gosec-identities-daas/profiling/role/bulk/identities?tid=" + tenantId;
+
+        if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
+            endPointGetAllUsers = "/gosec/identities/identities/users";
+            endPointGetAllGroups = "/gosec/identities/identities/groups";
+            endPointGetAllRoles = "/gosec/identities/profiling/role?count=1&name=" + roleName + "&tid=" + tenantId;
+            endPointRolePatch = "/gosec/identities/profiling/role/bulk/identities?tid=" + tenantId;
+        }
+
         String rid = "roleId";
         Boolean content = false;
         String select = "USERS";
@@ -1863,6 +1888,10 @@ public class GosecSpec extends BaseGSpec {
             commonspec.getLogger().debug("RID obtenido--> {}", rid);
 
             String endPointRole = "/service/gosec-identities-daas/profiling/role/" + rid + "?select=" + select;
+
+            if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
+                endPointRole = "/gosec/identities/profiling/role/" + rid + "?select=" + select;
+            }
 
             //GET user/group
             restSpec.sendRequestNoDataTable("GET", endPointGosec, null, null, null);
@@ -1931,13 +1960,20 @@ public class GosecSpec extends BaseGSpec {
         }
     }
 
-
     @When("^I delete '(user|group)' '(.+?)' from role '(.+?)' in tenant '(.+?)'$")
     public void deleteResourceInRole(String resource, String resourceId, String roleName, String tenantId) throws Exception {
         String endPointGetAllUsers = "/service/gosec-identities-daas/identities/users";
         String endPointGetAllGroups = "/service/gosec-identities-daas/identities/groups";
         String endPointGetAllRoles = "/service/gosec-identities-daas/profiling/role?count=1&name=" + roleName + "&tid=" + tenantId;
         String endPointRolePatch = "/service/gosec-identities-daas/profiling/role/bulk/identities?tid=" + tenantId;
+
+        if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
+            endPointGetAllUsers = "/gosec/identities/identities/users";
+            endPointGetAllGroups = "/gosec/identities/identities/groups";
+            endPointGetAllRoles = "/gosec/identities/profiling/role?count=1&name=" + roleName + "&tid=" + tenantId;
+            endPointRolePatch = "/gosec/identities/profiling/role/bulk/identities?tid=" + tenantId;
+        }
+
         String rid = "roleId";
         Boolean content = false;
         String select = "USERS";
@@ -1972,6 +2008,10 @@ public class GosecSpec extends BaseGSpec {
             commonspec.getLogger().debug("RID obtenido--> {}", rid);
 
             String endPointRole = "/service/gosec-identities-daas/profiling/role/" + rid + "?select=" + select;
+
+            if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
+                endPointRole = "/gosec/identities/profiling/role/" + rid + "?select=" + select;
+            }
 
             //GET user/group
             restSpec.sendRequestNoDataTable("GET", endPointGosec, null, null, null);
@@ -2061,4 +2101,5 @@ public class GosecSpec extends BaseGSpec {
         new File(System.getProperty("user.dir") + "/target/test-classes/ldapSync.conf").delete();
     }
 }
+
 
