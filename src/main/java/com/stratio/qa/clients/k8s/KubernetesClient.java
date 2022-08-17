@@ -1832,6 +1832,6 @@ public class KubernetesClient {
         deploymentSpec.setTemplate(templateSpec);
         deployment.setSpec(deploymentSpec);
 
-        k8sClient.apps().deployments().inNamespace(namespace).withName(deploymentName).edit().setSpec(deploymentSpec);
+        k8sClient.apps().deployments().inNamespace(namespace).withName(deploymentName).replace(deployment);
     }
 }
