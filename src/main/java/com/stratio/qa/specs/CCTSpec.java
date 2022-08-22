@@ -64,6 +64,8 @@ public class CCTSpec extends BaseGSpec {
     CCTUtils cctUtils;
 
     RestSpec restSpec;
+
+    MiscSpec miscSpec;
     /**
      * Generic constructor.
      *
@@ -73,6 +75,7 @@ public class CCTSpec extends BaseGSpec {
         this.commonspec = spec;
         restSpec = new RestSpec(spec);
         cctUtils = new CCTUtils(spec);
+        miscSpec = new MiscSpec(spec);
     }
 
     @When("^I get taskId for task '(.+?)' in service with id '(.+?)' from CCT and save the value in environment variable '(.+?)'$")
@@ -773,6 +776,35 @@ public class CCTSpec extends BaseGSpec {
         return numTasksRunning == numTasks;
     }
 
+    @Given("^in less than '(\\d+)' seconds, checking each '(\\d+)' seconds, I check that the job with ID '(.+?)' in CCT is in '(created|started|stopped|failed|completed|completed_with_errors)' status")
+    public void checkJobStatus(Integer timeout, Integer wait, String jobId, String expectedStatus) throws Exception {
+        // Set REST connection
+        commonspec.setCCTConnection(null, null);
+        String endPoint = ThreadProperty.get("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH") + "/v1/jobs/" + jobId;
+        boolean statusService = false;
+        int i = 0;
+        while (!statusService && i <= timeout) {
+            try {
+                Future<Response> response = commonspec.generateRequest("GET", false, null, null, endPoint, "", null);
+                commonspec.setResponse(endPoint, response.get());
+                miscSpec.saveElementEnvironment(null, "$.status", "jobStatus");
+                statusService = expectedStatus.equalsIgnoreCase(ThreadProperty.get("jobStatus"));
+            } catch (Exception e) {
+                commonspec.getLogger().warn("Error in request " + endPoint + " - " + e);
+            }
+            if (!statusService) {
+                commonspec.getLogger().warn(expectedStatus + " status not found after " + i + " seconds. Current status: " + ThreadProperty.get("jobStatus"));
+                if (i < timeout) {
+                    Thread.sleep(wait * 1000);
+                }
+            }
+            i += wait;
+        }
+        if (!statusService) {
+            fail(expectedStatus + " status not found after " + timeout + " seconds for job " + jobId);
+        }
+    }
+
     /**
      * Get info from centralized configuration
      *
@@ -1341,8 +1373,7 @@ public class CCTSpec extends BaseGSpec {
             logger.error("Request to endpoint: " + endPoint + " failed with status code: " + commonspec.getResponse().getStatusCode() + " and response: " + commonspec.getResponse().getResponse());
             throw new Exception("Request to endpoint: " + endPoint + " failed with status code: " + commonspec.getResponse().getStatusCode() + " and response: " + commonspec.getResponse().getResponse());
         }
-
-        //TODO Check application status in KEOS
+        miscSpec.saveElementEnvironment(null, "$.id", "jobId");
     }
 
     /**
@@ -1435,8 +1466,7 @@ public class CCTSpec extends BaseGSpec {
             logger.error("Request to endpoint: " + endPoint + " failed with status code: " + commonspec.getResponse().getStatusCode() + " and response: " + commonspec.getResponse().getResponse());
             throw new Exception("Request to endpoint: " + endPoint + " failed with status code: " + commonspec.getResponse().getStatusCode() + " and response: " + commonspec.getResponse().getResponse());
         }
-
-        // TODO Check service is deleted successfully
+        miscSpec.saveElementEnvironment(null, "$.id", "jobId");
     }
 
     /**
@@ -1659,8 +1689,7 @@ public class CCTSpec extends BaseGSpec {
             logger.error("Request to endpoint: " + endPointUpdate + " failed with status code: " + commonspec.getResponse().getStatusCode() + " and response: " + commonspec.getResponse().getResponse());
             throw new Exception("Request to endpoint: " + endPointUpdate + " failed with status code: " + commonspec.getResponse().getStatusCode() + " and response: " + commonspec.getResponse().getResponse());
         }
-
-        //TODO Check application status in KEOS
+        miscSpec.saveElementEnvironment(null, "$.id", "jobId");
     }
 
     private void updateCCTServiceDcos(String serviceName, String folder, String tenant, String version, String jsonFile, DataTable modifications, boolean checkServiceStatus) throws Exception {
@@ -2701,4 +2730,38 @@ public class CCTSpec extends BaseGSpec {
         Assertions.assertThat(ThreadProperty.get(envVar)).isNotEmpty();
     }
 
+    @Given("^I create tenant '(.+?)' through CCT$")
+    public void createTenant(String tenantName) throws Exception {
+        commonspec.setCCTConnection(null, null);
+        String endPoint = ThreadProperty.get("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH") + "/v1/tenant";
+        JSONObject jsonTenant = new JSONObject();
+        jsonTenant.put("kind", "Tenant");
+        jsonTenant.put("apiVersion", "capsule.clastix.io/v1alpha1");
+        JSONObject owner = new JSONObject();
+        owner.put("name", tenantName);
+        owner.put("kind", "Group");
+        JSONObject spec = new JSONObject();
+        spec.put("owner", owner);
+        jsonTenant.put("spec", spec);
+        JSONObject annotations = new JSONObject();
+        annotations.put("stratio.tenant.kubernetes.io/disable-net-policies", (Object) null);
+        annotations.put("stratio.tenant.kubernetes.io/disable-sec-policies", (Object) null);
+        JSONObject metadata = new JSONObject();
+        metadata.put("annotations", annotations);
+        metadata.put("name", tenantName);
+        metadata.put("uid", (Object) null);
+        jsonTenant.put("metadata", metadata);
+        Future<Response> response = commonspec.generateRequest("POST", true, null, null, endPoint, jsonTenant.toString(), "json");
+        commonspec.setResponse("POST", response.get());
+        Assertions.assertThat(commonspec.getResponse().getStatusCode()).isEqualTo(200);
+    }
+
+    @Given("^I create namespace with name '(.+?)' in tenant '(.+?)' through CCT$")
+    public void createNamespace(String namespace, String tenantName) throws Exception {
+        commonspec.setCCTConnection(null, null);
+        String endPoint = ThreadProperty.get("KEOS_CCT_PAAS_INGRESS_PATH") + "/v1/namespace";
+        Future<Response> response = commonspec.generateRequest("POST", true, null, null, endPoint, "name=" + namespace.replaceAll(tenantName + "-", "") + "&tenant=" + tenantName, "string");
+        commonspec.setResponse("POST", response.get());
+        Assertions.assertThat(commonspec.getResponse().getStatusCode()).isEqualTo(200);
+    }
 }
