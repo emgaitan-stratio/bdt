@@ -690,6 +690,12 @@ public class K8SSpec extends BaseGSpec {
         commonspec.kubernetesClient.addValueInConfigMap(cmName, namespace, cmKey, cmValue);
     }
 
+    @When("^I add/modify variable '(.+?)' with value defined in file '(.+?)' in configmap with name '(.+?)' in namespace '(.+?)'$")
+    public void addOrModifyConfigmapFile(String cmKey, String cmFileValue, String cmName, String namespace) {
+        String cmValue = commonspec.retrieveData(cmFileValue, "ignored");
+        commonspec.kubernetesClient.addValueInConfigMap(cmName, namespace, cmKey, cmValue);
+    }
+
     @When("^I add/modify variables in configmap with name '(.+?)' in namespace '(.+?)':$")
     public void addOrModifyMultipleConfigmap(String cmName, String namespace, DataTable variables) {
         commonspec.kubernetesClient.addValuesInConfigMap(cmName, namespace, variables);
@@ -733,5 +739,17 @@ public class K8SSpec extends BaseGSpec {
         });
 
         this.commonspec.kubernetesClient.updateDeploymentEnvVars(envVars, namespace, deploymentName, containerName);
+    }
+
+    @When("^I get key '(.+?)' in configmap with name '(.+?)' in namespace '(.+?)'( and save it in environment variable '(.*?)')?( and save it in file '(.*?)')?$")
+    public void getList(String key, String configMapName, String namespace, String envVar, String fileName) throws Exception {
+        String value = this.commonspec.kubernetesClient.getConfigMapKey(configMapName, namespace, key);
+        assertThat(value).as("Key doesn't exist in configmap").isNotNull();
+        if (envVar != null) {
+            ThreadProperty.set(envVar, value);
+        }
+        if (fileName != null) {
+            writeInFile(value, fileName);
+        }
     }
 }

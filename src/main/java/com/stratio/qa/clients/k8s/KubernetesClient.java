@@ -1839,4 +1839,8 @@ public class KubernetesClient {
 
         k8sClient.apps().deployments().inNamespace(namespace).withName(deploymentName).replace(deployment);
     }
+
+    public String getConfigMapKey(String configMapName, String namespace, String key) {
+        return getConfigMap(configMapName, namespace).getData().get(key);
+    }
 }
