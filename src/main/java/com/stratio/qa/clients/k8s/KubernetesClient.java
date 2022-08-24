@@ -268,44 +268,46 @@ public class KubernetesClient {
             ThreadProperty.set("cct-paas-services_id", "cct-paas-services");
         }
 
+        String basepath = System.getProperty("KEOS_AUTH_ADMIN_BASEPATH", "");
+
         Ingress gosecIngress = k8sClient.network().v1().ingresses().inNamespace("keos-core").withName("gosec-management-ui").get();
-        if (gosecIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec")) {
-            ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", "/gosec");
+        if (gosecIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/gosec")) {
+            ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", basepath + "/gosec");
         }
-        if (gosecIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec/ui")) {
-            ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", "/gosec/ui");
+        if (gosecIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/gosec/ui")) {
+            ThreadProperty.set("KEOS_GOSEC_INGRESS_PATH", basepath + "/gosec/ui");
         }
         ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct");
         Ingress cctIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct_ui_id")).get();
-        if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/" + ThreadProperty.get("cct_ui_id"))) {
-            ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/" + ThreadProperty.get("cct_ui_id"));
-        } else if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/ui")) {
-            ThreadProperty.set("KEOS_CCT_INGRESS_PATH", "/cct/ui");
+        if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/" + ThreadProperty.get("cct_ui_id"))) {
+            ThreadProperty.set("KEOS_CCT_INGRESS_PATH", basepath + "/" + ThreadProperty.get("cct_ui_id"));
+        } else if (cctIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/cct/ui")) {
+            ThreadProperty.set("KEOS_CCT_INGRESS_PATH", basepath + "/cct/ui");
         }
         ThreadProperty.set("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH", "/" + ThreadProperty.get("cct-orchestrator_id"));
         Ingress cctOrchestratorIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-orchestrator_id")).get();
-        if (cctOrchestratorIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/" + ThreadProperty.get("cct-orchestrator_id"))) {
-            ThreadProperty.set("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH", "/cct/" + ThreadProperty.get("cct-orchestrator_id"));
+        if (cctOrchestratorIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/cct/" + ThreadProperty.get("cct-orchestrator_id"))) {
+            ThreadProperty.set("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH", basepath + "/cct/" + ThreadProperty.get("cct-orchestrator_id"));
         }
         ThreadProperty.set("KEOS_CCT_UNIVERSE_SERVICE_INGRESS_PATH", "/" + ThreadProperty.get("cct-universe_id"));
         Ingress cctUniverseServiceIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-universe_id")).get();
-        if (cctUniverseServiceIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/" + ThreadProperty.get("cct-universe_id"))) {
-            ThreadProperty.set("KEOS_CCT_UNIVERSE_SERVICE_INGRESS_PATH", "/cct/" + ThreadProperty.get("cct-universe_id"));
+        if (cctUniverseServiceIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/cct/" + ThreadProperty.get("cct-universe_id"))) {
+            ThreadProperty.set("KEOS_CCT_UNIVERSE_SERVICE_INGRESS_PATH", basepath + "/cct/" + ThreadProperty.get("cct-universe_id"));
         }
         ThreadProperty.set("KEOS_CCT_APPLICATIONS_QUERY_SERVICE_INGRESS_PATH", "/" + ThreadProperty.get("cct-applications-query_id"));
         Ingress cctApplicationsQueryServiceIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-applications-query_id")).get();
-        if (cctApplicationsQueryServiceIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/" + ThreadProperty.get("cct-applications-query_id"))) {
-            ThreadProperty.set("KEOS_CCT_APPLICATIONS_QUERY_SERVICE_INGRESS_PATH", "/cct/" + ThreadProperty.get("cct-applications-query_id"));
+        if (cctApplicationsQueryServiceIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/cct/" + ThreadProperty.get("cct-applications-query_id"))) {
+            ThreadProperty.set("KEOS_CCT_APPLICATIONS_QUERY_SERVICE_INGRESS_PATH", basepath + "/cct/" + ThreadProperty.get("cct-applications-query_id"));
         }
         ThreadProperty.set("KEOS_CCT_PAAS_INGRESS_PATH", "/" + ThreadProperty.get("cct-paas-services_id"));
         Ingress cctPaasIngress = k8sClient.network().v1().ingresses().inNamespace("keos-cct").withName(ThreadProperty.get("cct-paas-services_id")).get();
-        if (cctPaasIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/cct/" + ThreadProperty.get("cct-paas-services_id"))) {
-            ThreadProperty.set("KEOS_CCT_PAAS_INGRESS_PATH", "/cct/" + ThreadProperty.get("cct-paas-services_id"));
+        if (cctPaasIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/cct/" + ThreadProperty.get("cct-paas-services_id"))) {
+            ThreadProperty.set("KEOS_CCT_PAAS_INGRESS_PATH", basepath + "/cct/" + ThreadProperty.get("cct-paas-services_id"));
         }
         ThreadProperty.set("KEOS_GOSEC_BAAS_INGRESS_PATH", "/baas");
         Ingress gosecBaasIngress = k8sClient.network().v1().ingresses().inNamespace("keos-core").withName("gosec-management-baas").get();
-        if (gosecBaasIngress != null && gosecBaasIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=/gosec/baas")) {
-            ThreadProperty.set("KEOS_GOSEC_BAAS_INGRESS_PATH", "/gosec/baas");
+        if (gosecBaasIngress != null && gosecBaasIngress.getSpec().getRules().get(0).getHttp().toString().contains("path=" + basepath + "/gosec/baas")) {
+            ThreadProperty.set("KEOS_GOSEC_BAAS_INGRESS_PATH", basepath + "/gosec/baas");
         }
     }
 
