@@ -29,6 +29,7 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import org.json.JSONObject;
 import org.testng.Assert;
 
 import java.io.*;
@@ -200,13 +201,35 @@ public class K8SSpec extends BaseGSpec {
         }
     }
 
-    @When("^I describe custom resource '(.+?)' with name '(.+?)' in namespace '(.+?)'( in '(yaml|json)' format)?( and save it in file '(.*?)')?$")
+    @When("^I describe custom resource '(.+?)' with name '(.+?)' in namespace '(.+?)'( in '(yaml|json|enrichedJson)' format)?( and save it in file '(.*?)')?$")
     public void describeCustomResource(String name, String nameItem, String namespace, String format, String fileName) throws Exception {
         String describeResponse;
         format = (format != null) ? format : "yaml";
         describeResponse = commonspec.kubernetesClient.describeCustomResourceJson(name, nameItem, namespace);
         if (describeResponse == null) {
             fail("Error obtaining" + name + nameItem + " information");
+        }
+
+        /*
+          "enrichedJson" format generates a JSON file like executing the command:  kubectl get <CRD_TYPE> -o json
+
+          This is needed in order to apply it directly.
+         */
+        if (format.equals("enrichedJson")) {
+            JSONObject jsonOriginal = new JSONObject(describeResponse);
+            JSONObject jsonModified = new JSONObject(describeResponse);
+
+            jsonModified.remove("additionalProperties");
+            jsonModified.remove("additionalPropertiesNode");
+            jsonModified.remove("finalizers");
+            jsonModified.remove("markedForDeletion");
+            jsonModified.remove("plural");
+            jsonModified.remove("singular");
+
+            jsonModified.put("spec", ((JSONObject) jsonOriginal.get("additionalProperties")).get("spec"));
+            jsonModified.put("status", ((JSONObject) jsonOriginal.get("additionalProperties")).get("status"));
+
+            describeResponse = jsonModified.toString();
         }
 
         if (format.equals("yaml")) {

@@ -10,6 +10,7 @@ Only listing significant user-visible, not internal code cleanups and minor bug 
 
 ### Branched to branch-0.21 (2022-07-01)
 
+* [CYB-57051] Add enriched JSON format to allow applying CR changes directly
 * [EOS-5743] Modify step to retrieve admin and sis basepath from keos.yaml
 * [GS-3881] Adapt management-baas path according to keos version
 * [QATM-3773] Refactor creating cutom users/groups
