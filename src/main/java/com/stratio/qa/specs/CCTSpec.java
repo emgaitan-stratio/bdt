@@ -2730,8 +2730,8 @@ public class CCTSpec extends BaseGSpec {
         Assertions.assertThat(ThreadProperty.get(envVar)).isNotEmpty();
     }
 
-    @Given("^I create tenant '(.+?)' through CCT( with users: '(.+?)')?( with groups: '(.+?)')?$")
-    public void createTenant(String tenantName, String tenantUsers, String tenantGroups) throws Exception {
+    @Given("^I create tenant '(.+?)' through CCT( with users: '(.+?)')?( with groups: '(.+?)')?( without identities)?$")
+    public void createTenant(String tenantName, String tenantUsers, String tenantGroups, String withoutIdentities) throws Exception {
         commonspec.setCCTConnection(null, null);
         String endPoint = ThreadProperty.get("KEOS_CCT_ORCHESTRATOR_INGRESS_PATH") + "/v1/tenant";
         JSONObject jsonTenant = new JSONObject();
@@ -2746,8 +2746,10 @@ public class CCTSpec extends BaseGSpec {
         JSONObject annotations = new JSONObject();
         annotations.put("stratio.tenant.kubernetes.io/disable-net-policies", (Object) null);
         annotations.put("stratio.tenant.kubernetes.io/disable-sec-policies", (Object) null);
-        annotations.put("stratio.tenant.kubernetes.io/gosec-tenant-initial-uids", tenantUsers != null ? tenantUsers : tenantName + "-user");
-        annotations.put("stratio.tenant.kubernetes.io/gosec-tenant-initial-gids", tenantGroups != null ? tenantGroups : tenantName + "-group");
+        if (withoutIdentities == null) {
+            annotations.put("stratio.tenant.kubernetes.io/gosec-tenant-initial-uids", tenantUsers != null ? tenantUsers : tenantName + "-user");
+            annotations.put("stratio.tenant.kubernetes.io/gosec-tenant-initial-gids", tenantGroups != null ? tenantGroups : tenantName + "-group");
+        }
         JSONObject metadata = new JSONObject();
         metadata.put("annotations", annotations);
         metadata.put("name", tenantName);
