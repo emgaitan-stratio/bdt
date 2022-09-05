@@ -1022,11 +1022,12 @@ public class CommonGTest {
         CommonG commong = new CommonG();
 
         commong.setClient(new AsyncHttpClient());
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
-        Future<Response> response = commong.generateRequest("GET", false, "bdt", "bdt", "/monitoring", "", "");
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
+        Future<Response> response = commong.generateRequest("GET", false, "bdt", "bdt", "/", "", "");
 
-        assertThat(401).as("GET Request with exit code status 401").isEqualTo(response.get().getStatusCode());
+        assertThat(response.get().getStatusCode()).as("GET Request with exit code status 401").isEqualTo(401);
     }
 
     @Test
@@ -1035,13 +1036,14 @@ public class CommonGTest {
         CommonG commong = new CommonG();
 
         commong.setClient(new AsyncHttpClient());
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
-        String data = "{j_username=user&j_password=pass";
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
+        String data = "{j_username=user&j_password=pass}";
 
-        Future<Response> response = commong.generateRequest("POST", false, "bdt", "bdt", "/j_acegi_security_check", data, "");
+        Future<Response> response = commong.generateRequest("POST", false, "bdt", "bdt", "", data, "");
 
-        assertThat(401).as("GET Request with exit code status 401").isEqualTo(response.get().getStatusCode());
+        assertThat(response.get().getStatusCode()).as("GET Request with exit code status 401").isEqualTo(401);
     }
 
     @Test
@@ -1050,13 +1052,14 @@ public class CommonGTest {
         CommonG commong = new CommonG();
 
         commong.setClient(new AsyncHttpClient());
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
-        String data = "{j_username=user&j_password=pass";
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
+        String data = "{j_username=user&j_password=pass}";
 
         Future<Response> response = commong.generateRequest("DELETE", false, "bdt", "bdt", "/j_acegi_security_check", data, "");
 
-        assertThat(401).as("GET Request with exit code status 401").isEqualTo(response.get().getStatusCode());
+        assertThat(response.get().getStatusCode()).as("GET Request with exit code status 401").isEqualTo(401);
     }
 
     @Test
@@ -1065,13 +1068,14 @@ public class CommonGTest {
         CommonG commong = new CommonG();
 
         commong.setClient(new AsyncHttpClient());
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
         String data = "{j_username=user&j_password=pass";
 
         Future<Response> response = commong.generateRequest("PUT", false, "bdt", "bdt", "/j_acegi_security_check", data, "");
 
-        assertThat(401).as("GET Request with exit code status 401").isEqualTo(response.get().getStatusCode());
+        assertThat(response.get().getStatusCode()).as("GET Request with exit code status 401").isEqualTo(401);
     }
 
     @Test

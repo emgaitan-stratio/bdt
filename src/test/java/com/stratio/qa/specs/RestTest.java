@@ -37,8 +37,9 @@ public class RestTest {
     public void testsendRequestDataTableTimeout() throws Exception {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
         String endPoint = "endpoint";
         String expectedMsg = "regex:tag";
         String requestType = "POST";
@@ -64,8 +65,9 @@ public class RestTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
         commong.setClient(new AsyncHttpClient());
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
 
         Future<Response> response = commong.generateRequest("GET", false, null, null, "/job/AI/job/NightlyForward/", null, "string");
         commong.setResponse("GET", (Response) response.get());
@@ -87,8 +89,9 @@ public class RestTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
         commong.setClient(new AsyncHttpClient());
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
 
         Future<Response> response = commong.generateRequest("GET", false, null, null, "/job/AI/job/NightlyForward/", null, "string");
         commong.setResponse("GET", (Response) response.get());
@@ -110,8 +113,9 @@ public class RestTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
         commong.setClient(new AsyncHttpClient());
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
 
         Future<Response> response = commong.generateRequest("GET", false, null, null, "/job/AI/job/NightlyForward/", null, "string");
         commong.setResponse("GET", (Response) response.get());
@@ -132,8 +136,9 @@ public class RestTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
         commong.setClient(new AsyncHttpClient());
-        commong.setRestHost("jenkins.int.stratio.com");
-        commong.setRestPort(":80");
+        commong.setRestProtocol("https://");
+        commong.setRestHost("builder.int.stratio.com");
+        commong.setRestPort(":443");
 
         Future<Response> response = commong.generateRequest("GET", false, null, null, "/job/AI/job/NightlyForward/", null, "string");
         commong.setResponse("GET", (Response) response.get());
