@@ -317,6 +317,23 @@ public class CCTSpec extends BaseGSpec {
      * @throws Exception
      */
     private String getLog(String logType, Integer lastLinesToRead, String service, String taskAttr, Integer position, String taskState, String taskAttrType) throws Exception {
+        String logPath = getLogPathFromCCT(logType, service, taskAttr, position, taskState, taskAttrType);
+        return readLogsFromMesos(logPath, lastLinesToRead);
+    }
+
+    /**
+     * Get log path from service through CCT
+     *
+     * @param logType         stdout / stderr
+     * @param service         Service ID
+     * @param taskAttr        Task name
+     * @param position        Task position
+     * @param taskState       Task state
+     * @param taskAttrType    Task attribute type
+     * @return Log path
+     * @throws Exception
+     */
+    public String getLogPathFromCCT(String logType, String service, String taskAttr, Integer position, String taskState, String taskAttrType) throws Exception {
         String logPath;
         if (ThreadProperty.get("cct-marathon-services_id") == null) {
             // Deploy-api
@@ -341,7 +358,7 @@ public class CCTSpec extends BaseGSpec {
             return null;
         }
         commonspec.getLogger().debug("Log path: " + logPath);
-        return readLogsFromMesos(logPath, lastLinesToRead);
+        return logPath;
     }
 
     private String generateMesosLogPath(String taskId, String logType) {
