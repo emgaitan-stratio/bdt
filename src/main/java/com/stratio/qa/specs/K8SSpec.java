@@ -29,6 +29,7 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.testng.Assert;
 
@@ -774,5 +775,16 @@ public class K8SSpec extends BaseGSpec {
         if (fileName != null) {
             writeInFile(value, fileName);
         }
+    }
+
+    @When("I patch custom resource '(.+?)' with name '(.+?)' in namespace '(.+?)' with path '(.+?)' and value '(.+?)' as '(.+?)'( with exit status '(\\d+)')?")
+    public void executePatch(String deploymentName, String crdName, String namespace, String path, String value, String type, String sExitStatus) {
+        Integer exitStatus = sExitStatus != null ? Integer.valueOf(sExitStatus) : null;
+        if (exitStatus == null) {
+            exitStatus = 0;
+        }
+        int response = this.commonspec.kubernetesClient.patch(deploymentName, crdName, namespace, path, value, type);
+        Assertions.assertThat(response).isEqualTo(exitStatus);
+
     }
 }
