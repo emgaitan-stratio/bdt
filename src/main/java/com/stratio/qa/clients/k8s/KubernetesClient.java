@@ -710,16 +710,15 @@ public class KubernetesClient {
     public Map<String, String> execCommand(String pod, String namespace, String container, Integer timeout, String[] command, String failureReason) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayOutputStream error = new ByteArrayOutputStream();
-        ByteArrayOutputStream errorChannel = new ByteArrayOutputStream();
         Map<String, String> result = new HashMap<>();
         execLatch = new CountDownLatch(1);
         ExecWatch execWatch;
+        MyPodExecListener myPodExecListener = new MyPodExecListener();
         if (container == null) {
             execWatch = k8sClient.pods().inNamespace(namespace).withName(pod)
                     .writingOutput(out)
                     .writingError(error)
-                    .writingErrorChannel(errorChannel)
-                    .usingListener(new MyPodExecListener())
+                    .usingListener(myPodExecListener)
                     .exec(command);
 
         } else {
@@ -727,8 +726,7 @@ public class KubernetesClient {
                     .inContainer(container)
                     .writingOutput(out)
                     .writingError(error)
-                    .writingErrorChannel(errorChannel)
-                    .usingListener(new MyPodExecListener())
+                    .usingListener(myPodExecListener)
                     .exec(command);
 
         }
@@ -739,17 +737,21 @@ public class KubernetesClient {
         logger.debug("Exec Output: {} ", out);
         execWatch.close();
 
-        JSONObject errorJSON = new JSONObject(errorChannel.toString());
-
-        if (failureReason == null && errorJSON.get("status").toString().matches("Failure")) {
-            throw new Exception("Command exit code is other than zero: " + errorJSON.get("message").toString());
-        } else if (failureReason != null) {
-            logger.debug("Command exit code is other than zero: {}", errorJSON.get("message"));
-            Assertions.assertThat(errorJSON.get("reason")).isEqualTo(failureReason);
+        if (failureReason != null) {
+            if (myPodExecListener.getStatus() != null && myPodExecListener.getStatus().getStatus() != null) {
+                Assertions.assertThat(myPodExecListener.getStatus().getReason()).isEqualTo(failureReason);
+            } else {
+                throw new Exception("Expected failureReason is " + failureReason + " but status returned is null with code " + myPodExecListener.getCode());
+            }
+        } else if (myPodExecListener.getCode() != 0) {
+            if (myPodExecListener.getStatus() != null && myPodExecListener.getStatus().getStatus() != null) {
+                throw new Exception("Command exit code is other than zero: " + myPodExecListener.getCode() + " - " + myPodExecListener.getStatus().getReason() + " - " + myPodExecListener.getStatus().getMessage());
+            } else {
+                throw new Exception("Command exit code is other than zero: " + myPodExecListener.getCode());
+            }
         }
         result.put("stdout", out.toString());
         result.put("stderr", error.toString());
-
         return result;
     }
 
@@ -1797,6 +1799,10 @@ public class KubernetesClient {
     }
 
     private static class MyPodExecListener implements ExecListener {
+        private int code;
+
+        private Status status;
+
         @Override
         public void onOpen() {
             getLogger().debug("K8S Shell was opened");
@@ -1812,6 +1818,19 @@ public class KubernetesClient {
         public void onClose(int i, String s) {
             getLogger().debug("K8S Shell Closing");
             execLatch.countDown();
+        }
+
+        public void onExit(int code, Status status) {
+            this.code = code;
+            this.status = status;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public Status getStatus() {
+            return status;
         }
     }
 
