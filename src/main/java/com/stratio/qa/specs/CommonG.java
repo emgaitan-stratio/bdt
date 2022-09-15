@@ -322,6 +322,10 @@ public class CommonG {
         return ElasticSearchUtil.INSTANCE.getElasticSearchUtils();
     }
 
+    public OpenSearchUtils getOpenSearchClient() {
+        return OpenSearchUtil.INSTANCE.getOpenSearchUtils();
+    }
+
     /**
      * Get the MongoDB utils.
      *
