@@ -18,7 +18,7 @@ package com.stratio.qa.specs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.ning.http.client.Response;
+import org.asynchttpclient.Response;
 import com.stratio.qa.assertions.Assertions;
 import com.stratio.qa.models.cct.deployApi.DeployedApp;
 import com.stratio.qa.models.cct.deployApi.DeployedTask;

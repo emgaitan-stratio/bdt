@@ -15,8 +15,8 @@
  */
 package com.stratio.qa.specs;
 
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Response;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Response;
 import com.stratio.qa.utils.ThreadProperty;
 import io.cucumber.datatable.DataTable;
 import org.hjson.JsonObject;
@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 import org.everit.json.schema.ValidationException;
 
@@ -1021,7 +1022,7 @@ public class CommonGTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
 
-        commong.setClient(new AsyncHttpClient());
+        commong.setClient(asyncHttpClient());
         commong.setRestProtocol("https://");
         commong.setRestHost("builder.int.stratio.com");
         commong.setRestPort(":443");
@@ -1035,7 +1036,7 @@ public class CommonGTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
 
-        commong.setClient(new AsyncHttpClient());
+        commong.setClient(asyncHttpClient());
         commong.setRestProtocol("https://");
         commong.setRestHost("builder.int.stratio.com");
         commong.setRestPort(":443");
@@ -1051,7 +1052,7 @@ public class CommonGTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
 
-        commong.setClient(new AsyncHttpClient());
+        commong.setClient(asyncHttpClient());
         commong.setRestProtocol("https://");
         commong.setRestHost("builder.int.stratio.com");
         commong.setRestPort(":443");
@@ -1067,7 +1068,7 @@ public class CommonGTest {
         ThreadProperty.set("class", this.getClass().getCanonicalName());
         CommonG commong = new CommonG();
 
-        commong.setClient(new AsyncHttpClient());
+        commong.setClient(asyncHttpClient());
         commong.setRestProtocol("https://");
         commong.setRestHost("builder.int.stratio.com");
         commong.setRestPort(":443");

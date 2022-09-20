@@ -16,8 +16,8 @@
 
 package com.stratio.qa.specs;
 
-import com.ning.http.client.FluentCaseInsensitiveStringsMap;
-import com.ning.http.client.Response;
+import io.netty.handler.codec.http.HttpHeaders;
+import org.asynchttpclient.Response;
 import com.stratio.qa.assertions.Assertions;
 import com.stratio.qa.utils.ThreadProperty;
 import cucumber.api.java.en.Given;
@@ -487,8 +487,7 @@ public class RestSpec extends BaseGSpec {
     public void saveResponseHeaderValueInEnvironmentVariableFile(String header, String envVar, String fileName) throws Exception {
         try {
             if (envVar != null || fileName != null) {
-                String value = commonspec.getResponse().getResponseHeaders().getFirstValue(header);
-
+                String value = commonspec.getResponse().getResponseHeaders().get(header);
                 if (envVar != null) {
                     ThreadProperty.set(envVar, value);
                 }

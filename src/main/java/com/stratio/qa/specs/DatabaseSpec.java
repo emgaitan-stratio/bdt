@@ -23,7 +23,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import com.ning.http.client.Response;
+import org.asynchttpclient.Response;
 import com.stratio.qa.assertions.DBObjectsAssert;
 import com.stratio.qa.exceptions.DBException;
 import com.stratio.qa.utils.JDBCConnection;

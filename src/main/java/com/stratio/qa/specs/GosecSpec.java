@@ -16,7 +16,7 @@
 
 package com.stratio.qa.specs;
 
-import com.ning.http.client.Response;
+import org.asynchttpclient.Response;
 import com.stratio.qa.assertions.Assertions;
 import com.stratio.qa.utils.ThreadProperty;
 import cucumber.api.java.en.When;
