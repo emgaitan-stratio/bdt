@@ -2796,7 +2796,7 @@ public class CommonG {
     public List<Cookie> addSsoToken(HashMap<String, String> ssoCookies, String[] tokenList) {
         List<Cookie> cookiesAttributes = new ArrayList<>();
         for (String tokenKey : tokenList) {
-            Cookie cookieToAdd = new DefaultCookie(tokenKey, ssoCookies.get(tokenKey));
+            Cookie cookieToAdd = new DefaultCookie(tokenKey, ssoCookies.get(tokenKey) != null ? ssoCookies.get(tokenKey) : "");
             cookieToAdd.setDomain(null);
             cookieToAdd.setPath(null);
             cookieToAdd.setWrap(false);
