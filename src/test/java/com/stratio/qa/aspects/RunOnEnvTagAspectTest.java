@@ -2674,4 +2674,22 @@ public class RunOnEnvTagAspectTest {
         tagList.add(new PickleTag(new PickleLocation(1,0),"@runOnEnv(KEOS_VERSION=0.6.0||KEOS_VERSION>0.6.0)"));
         assertThat(false).isEqualTo(runontag.tagsIteration(tagList,1));
     }
+
+    @Test
+    public void testCompareVariablesRun() throws Exception {
+        System.setProperty("TEST","nuevo");
+        System.setProperty("TEST2","nuevo");
+        List<PickleTag> tagList = new ArrayList<>();
+        tagList.add(new PickleTag(new PickleLocation(1,0),"@runOnEnv(TEST=!TEST2)"));
+        assertThat(false).isEqualTo(runontag.tagsIteration(tagList,1));
+    }
+
+    @Test
+    public void testCompareVariablesSkip() throws Exception {
+        System.setProperty("TEST","nuevo");
+        System.setProperty("TEST2","nuevo2");
+        List<PickleTag> tagList = new ArrayList<>();
+        tagList.add(new PickleTag(new PickleLocation(1,0),"@skipOnEnv(TEST=!TEST2)"));
+        assertThat(false).isEqualTo(runontag.tagsIteration(tagList,1));
+    }
 }

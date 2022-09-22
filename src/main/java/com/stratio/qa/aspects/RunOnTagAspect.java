@@ -204,6 +204,9 @@ public class RunOnTagAspect {
         boolean result = true;
         String param = element.split(operador)[0];
         String value = element.split(operador)[1];
+        if (value.startsWith("!")) {
+            value = System.getProperty(value.substring(1)) != null ? System.getProperty(value.substring(1), "") : ThreadProperty.get(value.substring(1)) != null ? ThreadProperty.get(value.substring(1)) : "";
+        }
         String property = System.getProperty(param) != null ? System.getProperty(param, "") : ThreadProperty.get(param) != null ? ThreadProperty.get(param) : "";
         if (property.isEmpty()) {
             result = false;
@@ -227,6 +230,9 @@ public class RunOnTagAspect {
         boolean res = result;
         String param = element.split(operador)[0];
         String value = element.split(operador)[1];
+        if (value.startsWith("!")) {
+            value = System.getProperty(value.substring(1)) != null ? System.getProperty(value.substring(1), "") : ThreadProperty.get(value.substring(1)) != null ? ThreadProperty.get(value.substring(1)) : "";
+        }
         String property = System.getProperty(param) != null ? System.getProperty(param, "") : ThreadProperty.get(param) != null ? ThreadProperty.get(param) : "";
         if (property.isEmpty()) {
             res =  updateResultOperation(operations, posop, result, false);
