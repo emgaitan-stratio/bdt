@@ -1722,6 +1722,23 @@ public class KubernetesClient {
     }
 
     /**
+     * Creates a new role
+     * kubectl create role xxx --verb=get --verb=list --verb=watch --verb=create --verb=delete --resource=pods --resource=services --resource=configmaps --resource=secrets --namespace=<namespace>
+     *
+     * @param roleName
+     * @param resources
+     * @param verbs
+     * @param apiGroups
+     */
+    public void createRole(String roleName, String resources, String verbs, String apiGroups, String namespace) {
+        String[] resourcesList = resources.split(",");
+        String[] verbsList = verbs.split(",");
+        String[] apiGroupsList = apiGroups != null ? apiGroups.split(",") : new String[]{""};
+        PolicyRule policyRule = new PolicyRuleBuilder().addToApiGroups(apiGroupsList).addToResources(resourcesList).addToVerbs(verbsList).build();
+        k8sClient.rbac().roles().resource(new RoleBuilder().withRules(policyRule).withNewMetadata().withName(roleName).withNamespace(namespace).endMetadata().build()).createOrReplace();
+    }
+
+    /**
      * Creates a new clusterRole
      * kubectl create clusterrole xxx --verb=get --verb=list --verb=watch --verb=create --verb=delete --resource=pods --resource=services --resource=configmaps --resource=secrets --namespace=<namespace>
      *
@@ -1736,6 +1753,36 @@ public class KubernetesClient {
         String[] apiGroupsList = apiGroups != null ? apiGroups.split(",") : new String[]{""};
         PolicyRule policyRule = new PolicyRuleBuilder().addToApiGroups(apiGroupsList).addToResources(resourcesList).addToVerbs(verbsList).build();
         k8sClient.rbac().clusterRoles().resource(new ClusterRoleBuilder().withRules(policyRule).withNewMetadata().withName(clusterRoleName).endMetadata().build()).createOrReplace();
+    }
+
+    /**
+     * Creates a new roleBinding
+     * kubectl create rolebinding xxx --role=xxx --serviceaccount=<namespace>:<serviceaccount> --namespace=<namespace>
+     *
+     * @param roleBindingName
+     * @param role
+     * @param serviceAccount
+     */
+    public void createRoleBinding(String roleBindingName, String role, String serviceAccount) {
+        List<Subject> subjects = new ArrayList<>();
+        Subject subject = new Subject();
+        subject.setKind("ServiceAccount");
+        subject.setName(serviceAccount.split(":")[1]);
+        subject.setNamespace(serviceAccount.split(":")[0]);
+        subjects.add(subject);
+        RoleRef roleRef = new RoleRef();
+        roleRef.setApiGroup("rbac.authorization.k8s.io");
+        roleRef.setKind("Role");
+        roleRef.setName(role);
+        RoleBinding roleBindingCreated = new RoleBindingBuilder()
+                .withNewMetadata()
+                .withName(roleBindingName)
+                .withNamespace(serviceAccount.split(":")[0])
+                .endMetadata()
+                .withRoleRef(roleRef)
+                .addAllToSubjects(subjects)
+                .build();
+        k8sClient.rbac().roleBindings().resource(roleBindingCreated).createOrReplace();
     }
 
     /**
