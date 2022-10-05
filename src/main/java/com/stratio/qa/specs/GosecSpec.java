@@ -1306,6 +1306,7 @@ public class GosecSpec extends BaseGSpec {
         Integer[] expectedStatusDelete = {200, 204};
         Boolean addSourceType = false;
         Boolean managementBaas = false;
+        Boolean addEnable = false;
         String endPointResource = "";
         String uid = userName.replaceAll("\\s+", ""); //delete white spaces
         String newEndPoint = "";
@@ -1332,6 +1333,10 @@ public class GosecSpec extends BaseGSpec {
 
             if (managementBaasVersion != null) {  //vamos por management-baas
                 managementBaas = true;
+                String[] gosecBaasVersionArray = managementBaasVersion.split("\\.");
+                if (Integer.parseInt(gosecBaasVersionArray[0]) >= 1 && Integer.parseInt(gosecBaasVersionArray[1]) >= 4) {
+                    addEnable = true;
+                }
             } else {
                 if (managementVersion != null) {  //vamos por management
                     String[] gosecVersionArray = managementVersion.split("\\.");
@@ -1353,9 +1358,10 @@ public class GosecSpec extends BaseGSpec {
                 if (!managementBaas) {
                     //json for gosec-management endpoint
                     data = generateManagementUserJson(uid, userName, groups, keytab, certificate, addSourceType);
+
                 } else {
                     //json for gosec-management-baas endpoint
-                    data = generateBaasUserJson(uid, userName, groups, keytab, certificate);
+                    data = generateBaasUserJson(uid, userName, groups, keytab, certificate, addEnable);
                 }
 
                 // Send POST request
@@ -1391,8 +1397,15 @@ public class GosecSpec extends BaseGSpec {
         String endPoint = baasPath + "/management/user";
         String endPointResource = "";
         Integer[] expectedStatusDelete = {200, 204};
+        Boolean addEnable = false;
+        String managementBaasVersion = ThreadProperty.get("gosec-management-baas_version");
+
+        String[] gosecBaasVersionArray = managementBaasVersion.split("\\.");
+        if (Integer.parseInt(gosecBaasVersionArray[0]) >= 1 && Integer.parseInt(gosecBaasVersionArray[1]) >= 4) {
+            addEnable = true;
+        }
         String uid = userName.replaceAll("\\s+", ""); //delete white spaces
-        String data = generateBaasUserJson(uid, userName, groups, keytab, certificate);
+        String data = generateBaasUserJson(uid, userName, groups, keytab, certificate, addEnable);
         if (tenantOrig != null) {
             // Set REST connection
             commonspec.setCCTConnection(tenantOrig, tenantLoginInfo);
@@ -1674,7 +1687,7 @@ public class GosecSpec extends BaseGSpec {
         return data;
     }
 
-    private String generateBaasUserJson(String uid, String userName, String groups, String keytab, String certificate) {
+    private String generateBaasUserJson(String uid, String userName, String groups, String keytab, String certificate, Boolean addEnable) {
         JSONObject postJson = new JSONObject();
         String data = "";
         postJson.put("uid", uid);
@@ -1699,6 +1712,9 @@ public class GosecSpec extends BaseGSpec {
         }
         if (certificate != null) {
             postJson.put("certificate", true);
+        }
+        if (addEnable != null) {
+            postJson.put("enable", true);
         }
         data = postJson.toString();
         return data;
