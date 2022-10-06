@@ -1398,7 +1398,9 @@ public class GosecSpec extends BaseGSpec {
         String endPointResource = "";
         Integer[] expectedStatusDelete = {200, 204};
         Boolean addEnable = false;
-        String managementBaasVersion = ThreadProperty.get("gosec-management-baas_version");
+        String managementBaasVersion = commonspec.kubernetesClient.getDeploymentVersion("gosec-management-baas", "keos-core");
+
+        commonspec.getLogger().debug("gosec-management-baas version: {}", managementBaasVersion);
 
         String[] gosecBaasVersionArray = managementBaasVersion.split("\\.");
         if (Integer.parseInt(gosecBaasVersionArray[0]) >= 1 && Integer.parseInt(gosecBaasVersionArray[1]) >= 4) {

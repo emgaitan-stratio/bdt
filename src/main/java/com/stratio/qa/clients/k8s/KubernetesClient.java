@@ -840,8 +840,8 @@ public class KubernetesClient {
     /**
      * kubectl delete statefulset mystatefulset
      *
-     * @param statefulset   Statefulset to delete
-     * @param namespace Namespace
+     * @param statefulset Statefulset to delete
+     * @param namespace   Namespace
      */
     public void deleteStatefulset(String statefulset, String namespace) {
         k8sClient.apps().statefulSets().inNamespace(namespace).withName(statefulset).delete();
@@ -1170,9 +1170,9 @@ public class KubernetesClient {
      * Add or modify value in configmap
      *
      * @param configMapName Configmap name
-     * @param namespace Namespace
-     * @param key Key
-     * @param value Value
+     * @param namespace     Namespace
+     * @param key           Key
+     * @param value         Value
      */
     public void addValueInConfigMap(String configMapName, String namespace, String key, String value) {
         Map<String, String> configMapData = getConfigMap(configMapName, namespace).getData();
@@ -1311,7 +1311,7 @@ public class KubernetesClient {
     /**
      * Get clusterrole
      *
-     * @param name      clusterrole name
+     * @param name clusterrole name
      */
     public ClusterRole getClusterRole(String name) {
         return k8sClient.rbac().clusterRoles().withName(name).get();
@@ -1333,7 +1333,7 @@ public class KubernetesClient {
     /**
      * kubectl describe clusterrole xxx -n namespace
      *
-     * @param crName    clusterrole name
+     * @param crName clusterrole name
      * @return String with clusterrole
      */
     public String describeClusterRole(String crName) {
@@ -1343,7 +1343,7 @@ public class KubernetesClient {
     /**
      * Get clusterrolebinding
      *
-     * @param name      clusterrolebinding name
+     * @param name clusterrolebinding name
      */
     public ClusterRoleBinding getClusterRoleBinding(String name) {
         return k8sClient.rbac().clusterRoleBindings().withName(name).get();
@@ -1365,7 +1365,7 @@ public class KubernetesClient {
     /**
      * kubectl describe clusterrolebinding xxx -n namespace
      *
-     * @param crName    clusterrolebinding name
+     * @param crName clusterrolebinding name
      * @return String with clusterrolebinding
      */
     public String describeClusterRoleBinding(String crName) {
@@ -1532,7 +1532,7 @@ public class KubernetesClient {
     /**
      * Remove ingress
      *
-     * @param name ingress name
+     * @param name      ingress name
      * @param namespace namespace
      */
     public void deleteIngress(String name, String namespace) {
@@ -1816,7 +1816,7 @@ public class KubernetesClient {
     /**
      * Describe job in yaml format
      *
-     * @param jobName Job name
+     * @param jobName   Job name
      * @param namespace Namespace
      * @return String with job in yaml format
      */
@@ -1827,7 +1827,7 @@ public class KubernetesClient {
     /**
      * Get job object
      *
-     * @param jobName Job name
+     * @param jobName   Job name
      * @param namespace Namespace
      * @return Job
      */
@@ -1926,7 +1926,7 @@ public class KubernetesClient {
      * @param namespace
      * @param path
      * @param value
-     * @param type  Integer or String
+     * @param type           Integer or String
      * @return 0 if success and 1 if fails
      **/
     public int patch(String deploymentName, String crdName, String namespace, String path, String value, String type) {
@@ -1970,5 +1970,21 @@ public class KubernetesClient {
             }
         }
         return response;
+    }
+
+    /**
+     * Return deployment version
+     *
+     * @param deploymentName Deployment name
+     * @param namespace      Namespace
+     * @return Deployment version
+     */
+    public String getDeploymentVersion(String deploymentName, String namespace) {
+        String version;
+        String image;
+        Deployment deployment = getDeployment(deploymentName, namespace);
+        image = deployment.getSpec().getTemplate().getSpec().getContainers().get(0).getImage();
+        version = image.split(":")[image.split(":").length - 1];
+        return version;
     }
 }
