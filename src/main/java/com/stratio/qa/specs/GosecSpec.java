@@ -1286,20 +1286,20 @@ public class GosecSpec extends BaseGSpec {
      * @param doesNotExist    : (IF false) resource will be overwritten if exists previously  (OPTIONAL)
      * @throws Exception
      */
-    @When("^I create custom user '(.+?)'( in tenant '(.+?)')?( with tenant user and tenant password '(.+:.+?)')?( generating keytab)?( generating certificate)?( assigned to groups '(.+?)')?( if it does not exist)?$")
-    public void createUserResource(String userName, String tenantOrig, String tenantLoginInfo, String keytab, String certificate, String groups, String doesNotExist) throws Exception {
+    @When("^I create (custom|system) user '(.+?)'( in tenant '(.+?)')?( with tenant user and tenant password '(.+:.+?)')?( generating keytab)?( generating certificate)?( assigned to groups '(.+?)')?( if it does not exist)?$")
+    public void createUserResource(String type, String userName, String tenantOrig, String tenantLoginInfo, String keytab, String certificate, String groups, String doesNotExist) throws Exception {
         Boolean booleanExist = false;
         if (doesNotExist != null) {
             booleanExist = true;
         }
         if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
-            createUserResourceKeos(userName, tenantOrig, tenantLoginInfo, keytab, certificate, groups, booleanExist);
+            createUserResourceKeos(type, userName, tenantOrig, tenantLoginInfo, keytab, certificate, groups, booleanExist);
         } else {
-            createUserResourceDcos(userName, tenantOrig, tenantLoginInfo, keytab, certificate, groups, booleanExist);
+            createUserResourceDcos(type, userName, tenantOrig, tenantLoginInfo, keytab, certificate, groups, booleanExist);
         }
     }
 
-    private void createUserResourceDcos(String userName, String tenantOrig, String tenantLoginInfo, String keytab, String certificate, String groups, boolean doesNotExist) throws Exception {
+    private void createUserResourceDcos(String type, String userName, String tenantOrig, String tenantLoginInfo, String keytab, String certificate, String groups, boolean doesNotExist) throws Exception {
         String managementVersion = ThreadProperty.get("gosec-management_version");
         String managementBaasVersion = ThreadProperty.get("gosec-management-baas_version");
         String endPoint = "/service/gosecmanagement" + ThreadProperty.get("API_USER");
@@ -1361,7 +1361,7 @@ public class GosecSpec extends BaseGSpec {
 
                 } else {
                     //json for gosec-management-baas endpoint
-                    data = generateBaasUserJson(uid, userName, groups, keytab, certificate, addEnable);
+                    data = generateBaasUserJson(uid, userName, groups, keytab, certificate, addEnable, type);
                 }
 
                 // Send POST request
@@ -1381,7 +1381,7 @@ public class GosecSpec extends BaseGSpec {
                         throw e;
                     }
                     //send request again
-                    createUserResourceDcos(userName, tenantOrig, tenantLoginInfo, keytab, certificate, groups, doesNotExist);
+                    createUserResourceDcos(type, userName, tenantOrig, tenantLoginInfo, keytab, certificate, groups, doesNotExist);
                 }
             }
 
@@ -1392,7 +1392,7 @@ public class GosecSpec extends BaseGSpec {
 
     }
 
-    private void createUserResourceKeos(String userName, String tenantOrig, String tenantLoginInfo, String keytab, String certificate, String groups, boolean doesNotExist) throws Exception {
+    private void createUserResourceKeos(String type, String userName, String tenantOrig, String tenantLoginInfo, String keytab, String certificate, String groups, boolean doesNotExist) throws Exception {
         String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
         String endPoint = baasPath + "/management/user";
         String endPointResource = "";
@@ -1407,7 +1407,7 @@ public class GosecSpec extends BaseGSpec {
             addEnable = true;
         }
         String uid = userName.replaceAll("\\s+", ""); //delete white spaces
-        String data = generateBaasUserJson(uid, userName, groups, keytab, certificate, addEnable);
+        String data = generateBaasUserJson(uid, userName, groups, keytab, certificate, addEnable, type);
         if (tenantOrig != null) {
             // Set REST connection
             commonspec.setCCTConnection(tenantOrig, tenantLoginInfo);
@@ -1434,7 +1434,7 @@ public class GosecSpec extends BaseGSpec {
                         throw e;
                     }
                     //send request again
-                    createUserResourceKeos(userName, tenantOrig, tenantLoginInfo, keytab, certificate, groups, doesNotExist);
+                    createUserResourceKeos(type, userName, tenantOrig, tenantLoginInfo, keytab, certificate, groups, doesNotExist);
                 }
             }
         } catch (Exception e) {
@@ -1455,20 +1455,20 @@ public class GosecSpec extends BaseGSpec {
      * @param doesNotExist    : (IF false) resource will be overwritten if exists previously  (OPTIONAL)
      * @throws Exception
      */
-    @When("^I create custom group '(.+?)'( in tenant '(.+?)')?( with tenant user and tenant password '(.+:.+?)')?( assigned to users '(.+?)')?( assigned to groups '(.+?)')?( if it does not exist)?$")
-    public void createGroupResource(String groupName, String tenantOrig, String tenantLoginInfo, String users, String groups, String doesNotExist) throws Exception {
+    @When("^I create (custom|system) group '(.+?)'( in tenant '(.+?)')?( with tenant user and tenant password '(.+:.+?)')?( assigned to users '(.+?)')?( assigned to groups '(.+?)')?( if it does not exist)?$")
+    public void createGroupResource(String type, String groupName, String tenantOrig, String tenantLoginInfo, String users, String groups, String doesNotExist) throws Exception {
         Boolean booleanExist = false;
         if (doesNotExist != null) {
             booleanExist = true;
         }
         if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
-            createGroupResourceKeos(groupName, tenantOrig, tenantLoginInfo, users, groups, booleanExist);
+            createGroupResourceKeos(type, groupName, tenantOrig, tenantLoginInfo, users, groups, booleanExist);
         } else {
-            createGroupResourceDcos(groupName, tenantOrig, tenantLoginInfo, users, groups, booleanExist);
+            createGroupResourceDcos(type, groupName, tenantOrig, tenantLoginInfo, users, groups, booleanExist);
         }
     }
 
-    private void createGroupResourceDcos(String groupName, String tenantOrig, String tenantLoginInfo, String users, String groups, boolean doesNotExist) throws Exception {
+    private void createGroupResourceDcos(String type, String groupName, String tenantOrig, String tenantLoginInfo, String users, String groups, boolean doesNotExist) throws Exception {
         String managementVersion = ThreadProperty.get("gosec-management_version");
         String managementBaasVersion = ThreadProperty.get("gosec-management-baas_version");
         String endPoint = "/service/gosecmanagement" + ThreadProperty.get("API_GROUP");
@@ -1525,7 +1525,7 @@ public class GosecSpec extends BaseGSpec {
 
                 } else {
                     //json for gosec-management-baas endpoint
-                    data = generateBaasGroupJson(gid, groupName, users, groups);
+                    data = generateBaasGroupJson(gid, groupName, users, groups, type);
                 }
 
                 // Send POST request
@@ -1545,7 +1545,7 @@ public class GosecSpec extends BaseGSpec {
                         throw e;
                     }
                     //send request again
-                    createGroupResourceDcos(groupName, tenantOrig, tenantLoginInfo, users, groups, doesNotExist);
+                    createGroupResourceDcos(type, groupName, tenantOrig, tenantLoginInfo, users, groups, doesNotExist);
                 }
             }
 
@@ -1556,12 +1556,12 @@ public class GosecSpec extends BaseGSpec {
 
     }
 
-    private void createGroupResourceKeos(String groupName, String tenantOrig, String tenantLoginInfo, String users, String groups, boolean doesNotExist) throws Exception {
+    private void createGroupResourceKeos(String type, String groupName, String tenantOrig, String tenantLoginInfo, String users, String groups, boolean doesNotExist) throws Exception {
         String baasPath = ThreadProperty.get("KEOS_GOSEC_BAAS_INGRESS_PATH");
         String endPoint = baasPath + "/management/group";
         String endPointResource = "";
         String gid = groupName.replaceAll("\\s+", ""); //delete white spaces
-        String data = generateBaasGroupJson(gid, groupName, users, groups);
+        String data = generateBaasGroupJson(gid, groupName, users, groups, type);
         Integer[] expectedStatusDelete = {200, 204};
 
         if (tenantOrig != null) {
@@ -1591,7 +1591,7 @@ public class GosecSpec extends BaseGSpec {
                         throw e;
                     }
                     //send request again
-                    createGroupResourceKeos(groupName, tenantOrig, tenantLoginInfo, users, groups, doesNotExist);
+                    createGroupResourceKeos(type, groupName, tenantOrig, tenantLoginInfo, users, groups, doesNotExist);
                 }
             }
         } catch (Exception e) {
@@ -1626,12 +1626,20 @@ public class GosecSpec extends BaseGSpec {
         return data;
     }
 
-    private String generateBaasGroupJson(String gid, String groupName, String users, String groups) {
+    private String generateBaasGroupJson(String gid, String groupName, String users, String groups, String type) {
         JSONObject postJson = new JSONObject();
         String data = "";
         postJson.put("gid", gid);
         postJson.put("name", groupName);
-        postJson.put("inputSourceType", "Custom");
+
+        if (type.equals("system")) {
+            postJson.put("inputSourceType", "System");
+        } else {
+            if (type.equals("custom")) {
+                postJson.put("inputSourceType", "Custom");
+            }
+        }
+
         if (users != null) {
             String[] uids = users.split(",");
             JSONArray jArray = new JSONArray();
@@ -1689,13 +1697,21 @@ public class GosecSpec extends BaseGSpec {
         return data;
     }
 
-    private String generateBaasUserJson(String uid, String userName, String groups, String keytab, String certificate, Boolean addEnable) {
+    private String generateBaasUserJson(String uid, String userName, String groups, String keytab, String certificate, Boolean addEnable, String type) {
         JSONObject postJson = new JSONObject();
         String data = "";
         postJson.put("uid", uid);
         postJson.put("name", userName);
         postJson.put("email", uid + "@stratio.com");
-        postJson.put("inputSourceType", "Custom");
+
+        if (type.equals("system")) {
+            postJson.put("inputSourceType", "System");
+        } else {
+            if (type.equals("custom")) {
+                postJson.put("inputSourceType", "Custom");
+            }
+        }
+
         if (groups != null) {
             String[] gids = groups.split(",");
             JSONArray jArray = new JSONArray();
