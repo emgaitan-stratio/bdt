@@ -146,19 +146,55 @@ public class KubernetesClient {
             String keosJson = commonspec.retrieveData(workspaceName + "/keos.json", "json");
             ThreadProperty.set("CLUSTER_SSH_USER", commonspec.getJSONPathString(keosJson, "$.infra.ssh_user", null).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", ""));
 
-            if (commonspec.getJSONPathString(keosJson, "$.keos.~", null).contains("auth")) {
-                if (commonspec.getJSONPathString(keosJson, "$.keos.auth.~", null).contains("admin") && commonspec.getJSONPathString(keosJson, "$.keos.auth.admin.~", null).contains("vHost")) {
-                    ThreadProperty.set("ADMIN_VHOST", commonspec.getJSONPathString(keosJson, "$.keos.auth.admin.vHost", null).replaceAll("\"", ""));
+            if (System.getProperty("KEOS_VERSION").matches(".*0\\.[1-4].*")) {
+
+                ThreadProperty.set("KEOS_DOMAIN", commonspec.getJSONPathString(keosJson, "$.keos.domain", null).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", ""));
+                ThreadProperty.set("ADMIN_VHOST", "admin" + "." + ThreadProperty.get("KEOS_DOMAIN"));
+                ThreadProperty.set("ADMIN_BASEPATH", "/");
+                ThreadProperty.set("SIS_VHOST", "sis" + "." + ThreadProperty.get("KEOS_DOMAIN"));
+                ThreadProperty.set("SIS_BASEPATH", "/sso");
+
+                if (commonspec.getJSONPathString(keosJson, "$.keos.~", null).contains("auth")) {
+                    if (commonspec.getJSONPathString(keosJson, "$.keos.auth.~", null).contains("admin") && commonspec.getJSONPathString(keosJson, "$.keos.auth.admin.~", null).contains("vHost")) {
+                        ThreadProperty.set("ADMIN_VHOST", commonspec.getJSONPathString(keosJson, "$.keos.auth.admin.vHost", null).replaceAll("\"", "") + ThreadProperty.get("KEOS_DOMAIN"));
+                    }
+                    if (commonspec.getJSONPathString(keosJson, "$.keos.auth.~", null).contains("admin") && commonspec.getJSONPathString(keosJson, "$.keos.auth.admin.~", null).contains("basepath")) {
+                        ThreadProperty.set("ADMIN_BASEPATH", commonspec.getJSONPathString(keosJson, "$.keos.auth.admin.basepath", null).replaceAll("\"", ""));
+                    }
+                    if (commonspec.getJSONPathString(keosJson, "$.keos.auth.~", null).contains("sis") && commonspec.getJSONPathString(keosJson, "$.keos.auth.sis.~", null).contains("vHost")) {
+                        ThreadProperty.set("SIS_VHOST", commonspec.getJSONPathString(keosJson, "$.keos.auth.sis.vHost", null).replaceAll("\"", "") + ThreadProperty.get("KEOS_DOMAIN"));
+                    }
+                    if (commonspec.getJSONPathString(keosJson, "$.keos.auth.~", null).contains("sis") && commonspec.getJSONPathString(keosJson, "$.keos.auth.sis.~", null).contains("basepath")) {
+                        ThreadProperty.set("SIS_BASEPATH", commonspec.getJSONPathString(keosJson, "$.keos.auth.sis.basepath", null).replaceAll("\"", ""));
+                    }
                 }
-                if (commonspec.getJSONPathString(keosJson, "$.keos.auth.~", null).contains("admin") && commonspec.getJSONPathString(keosJson, "$.keos.auth.admin.~", null).contains("basepath")) {
-                    ThreadProperty.set("ADMIN_BASEPATH", commonspec.getJSONPathString(keosJson, "$.keos.auth.admin.basepath", null).replaceAll("\"", ""));
+            }
+
+            if (System.getProperty("KEOS_VERSION").matches(".*0\\.[5-9].*")) {
+
+                ThreadProperty.set("KEOS_EXTERNAL_DOMAIN", commonspec.getJSONPathString(keosJson, "$.keos.external_domain", null).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", ""));
+                ThreadProperty.set("ADMIN_SUBDOMAIN", "admin");
+                ThreadProperty.set("ADMIN_BASEPATH", "/");
+                ThreadProperty.set("SIS_SUBDOMAIN", "sis");
+                ThreadProperty.set("SIS_BASEPATH", "/sso");
+
+                if (commonspec.getJSONPathString(keosJson, "$.keos.~", null).contains("ingress")) {
+                    if (commonspec.getJSONPathString(keosJson, "$.keos.ingress.~", null).contains("admin") && commonspec.getJSONPathString(keosJson, "$.keos.ingress.admin.~", null).contains("subdomain")) {
+                        ThreadProperty.set("ADMIN_SUBDOMAIN", commonspec.getJSONPathString(keosJson, "$.keos.ingress.admin.subdomain", null).replaceAll("\"", ""));
+                    }
+                    if (commonspec.getJSONPathString(keosJson, "$.keos.ingress.~", null).contains("admin") && commonspec.getJSONPathString(keosJson, "$.keos.ingress.admin.~", null).contains("basepath")) {
+                        ThreadProperty.set("ADMIN_BASEPATH", commonspec.getJSONPathString(keosJson, "$.keos.ingress.admin.basepath", null).replaceAll("\"", ""));
+                    }
+                    if (commonspec.getJSONPathString(keosJson, "$.keos.ingress.~", null).contains("sis") && commonspec.getJSONPathString(keosJson, "$.keos.ingress.sis.~", null).contains("subdomain")) {
+                        ThreadProperty.set("SIS_SUBDOMAIN", commonspec.getJSONPathString(keosJson, "$.keos.ingress.sis.subdomain", null).replaceAll("\"", ""));
+                    }
+                    if (commonspec.getJSONPathString(keosJson, "$.keos.ingress.~", null).contains("sis") && commonspec.getJSONPathString(keosJson, "$.keos.ingress.sis.~", null).contains("basepath")) {
+                        ThreadProperty.set("SIS_BASEPATH", commonspec.getJSONPathString(keosJson, "$.keos.ingress.sis.basepath", null).replaceAll("\"", ""));
+                    }
                 }
-                if (commonspec.getJSONPathString(keosJson, "$.keos.auth.~", null).contains("sis") && commonspec.getJSONPathString(keosJson, "$.keos.auth.sis.~", null).contains("vHost")) {
-                    ThreadProperty.set("SIS_VHOST", commonspec.getJSONPathString(keosJson, "$.keos.auth.sis.vHost", null).replaceAll("\"", ""));
-                }
-                if (commonspec.getJSONPathString(keosJson, "$.keos.auth.~", null).contains("sis") && commonspec.getJSONPathString(keosJson, "$.keos.auth.sis.~", null).contains("basepath")) {
-                    ThreadProperty.set("SIS_BASEPATH", commonspec.getJSONPathString(keosJson, "$.keos.auth.sis.basepath", null).replaceAll("\"", ""));
-                }
+
+                ThreadProperty.set("ADMIN_VHOST", ThreadProperty.get("ADMIN_SUBDOMAIN") + "." + ThreadProperty.get("KEOS_EXTERNAL_DOMAIN"));
+                ThreadProperty.set("SIS_VHOST", ThreadProperty.get("SIS_SUBDOMAIN") + "." + ThreadProperty.get("KEOS_EXTERNAL_DOMAIN"));
             }
 
             ThreadProperty.set("CLUSTER_SSH_PEM_PATH", "./target/test-classes/" + workspaceName + "/key");
