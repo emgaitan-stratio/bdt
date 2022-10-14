@@ -172,7 +172,14 @@ public class KubernetesClient {
 
             if (System.getProperty("KEOS_VERSION").matches(".*0\\.[5-9].*")) {
 
+                if (commonspec.getJSONPathString(keosJson, "$.keos.~", null).contains("domain")) {
+                    ThreadProperty.set("KEOS_DOMAIN", commonspec.getJSONPathString(keosJson, "$.keos.domain", null).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", ""));
+                } else {
+                    ThreadProperty.set("KEOS_DOMAIN", System.getProperty("KEOS_CLUSTER_ID") + "." + "int");
+                }
+
                 ThreadProperty.set("KEOS_EXTERNAL_DOMAIN", commonspec.getJSONPathString(keosJson, "$.keos.external_domain", null).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", ""));
+
                 ThreadProperty.set("ADMIN_SUBDOMAIN", "admin");
                 ThreadProperty.set("ADMIN_BASEPATH", "/");
                 ThreadProperty.set("SIS_SUBDOMAIN", "sis");
