@@ -16,6 +16,7 @@
 
 package com.stratio.qa.clients.k8s;
 
+import com.jayway.jsonpath.PathNotFoundException;
 import com.stratio.qa.specs.CommandExecutionSpec;
 import com.stratio.qa.specs.CommonG;
 import com.stratio.qa.specs.FileSpec;
@@ -149,6 +150,7 @@ public class KubernetesClient {
             if (System.getProperty("KEOS_VERSION").matches(".*0\\.[1-4].*")) {
 
                 ThreadProperty.set("KEOS_DOMAIN", commonspec.getJSONPathString(keosJson, "$.keos.domain", null).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", ""));
+
                 ThreadProperty.set("ADMIN_VHOST", "admin" + "." + ThreadProperty.get("KEOS_DOMAIN"));
                 ThreadProperty.set("ADMIN_BASEPATH", "/");
                 ThreadProperty.set("SIS_VHOST", "sis" + "." + ThreadProperty.get("KEOS_DOMAIN"));
@@ -172,9 +174,9 @@ public class KubernetesClient {
 
             if (System.getProperty("KEOS_VERSION").matches(".*0\\.[5-9].*")) {
 
-                if (commonspec.getJSONPathString(keosJson, "$.keos.~", null).contains("domain")) {
+                try {
                     ThreadProperty.set("KEOS_DOMAIN", commonspec.getJSONPathString(keosJson, "$.keos.domain", null).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", ""));
-                } else {
+                } catch (PathNotFoundException e) {
                     ThreadProperty.set("KEOS_DOMAIN", System.getProperty("KEOS_CLUSTER_ID") + "." + "int");
                 }
 
