@@ -1827,7 +1827,7 @@ public class GosecSpec extends BaseGSpec {
         jsonKey.put("assets", new JSONArray());
         writeInFile(jsonKey.toString(), "keyBody.json");
         restSpec.sendRequestNoDataTable("POST", endPoint, null, "keyBody.json", "json");
-        if (doesNotExist != null && commonspec.getResponse().getStatusCode() == 409) {
+        if (doesNotExist != null && (commonspec.getResponse().getStatusCode() == 409 || commonspec.getResponse().getStatusCode() == 412)) {
             commonspec.getLogger().warn("Key existed previously. It was not created.");
         } else {
             assertThat(commonspec.getResponse().getStatusCode()).isEqualTo(expectedResponse);
