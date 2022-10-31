@@ -1839,11 +1839,11 @@ public class GosecSpec extends BaseGSpec {
     public void createAsset(String assetName, String keyName, String algorithm, String tenantOrig, String tenantLoginInfo, String doesNotExist) throws Exception {
         String endPointGetKey = "/service/gosec-management-baas/management/encryption/keys";
         String endPointPostAsset = "/service/gosec-management-baas/management/encryption/asset";
-        String endPointGetAsset = "/service/gosec-management-baas/management/encryption/assets";
+        String endPointGetAsset = "/service/gosec-management-baas/management/encryption/assets?from=0&count=10000&orderBy=name&order=asc";
         if (ThreadProperty.get("isKeosEnv") != null && ThreadProperty.get("isKeosEnv").equals("true")) {
             endPointGetKey = "/gosec/baas/management/encryption/keys";
             endPointPostAsset = "/gosec/baas/management/encryption/asset";
-            endPointGetAsset = "/gosec/baas/management/encryption/assets";
+            endPointGetAsset = "/gosec/baas/management/encryption/assets?from=0&count=10000&orderBy=name&order=asc";
         }
         commonspec.setCCTConnection(tenantOrig, tenantLoginInfo);
         // Get Key ID
@@ -1860,8 +1860,10 @@ public class GosecSpec extends BaseGSpec {
         restSpec.sendRequestNoDataTable("POST", endPointPostAsset, null, "assetBody.json", "json");
         if (doesNotExist != null && commonspec.getResponse().getStatusCode() == 409) {
             restSpec.sendRequestNoDataTable("GET", endPointGetAsset, null, null, null);
-            commonspec.runLocalCommand("echo '" + commonspec.getResponse().getResponse() + "' | jq -cMr '.list[] | select(.name==\"" + assetName + "\")'");
+            writeInFile(commonspec.getResponse().getResponse(), "assetList.json");
+            commonspec.runLocalCommand("cat target/test-classes/assetList.json | jq -cMr '.list[] | select(.name==\"" + assetName + "\")'");
             JSONObject jsonAssetGet = new JSONObject(commonspec.getCommandResult());
+            commonspec.runLocalCommand("rm target/test-classes/assetList.json");
             if (jsonAssetGet.getString("name").equals(assetName) && jsonAssetGet.getString("algorithm").equals(algorithm)) {
                 commonspec.getLogger().warn("Asset existed previously. It was not created.");
             } else {
