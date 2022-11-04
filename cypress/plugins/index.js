@@ -6,11 +6,10 @@ const path = require('path');
 module.exports = (on, config) => {
     // `on` is used to hook into various events Cypress emits
     // `config` is the resolved Cypress config
-debugger;
 
     const options = {
         outputRoot: config.projectRoot + '/target/',
-        specRoot: path.relative(config.fileServerFolder, config.integrationFolder),
+        specRoot: path.relative(config.fileServerFolder, 'cypress/e2e'),
         outputTarget: {
             'executions|txt': 'txt',
         },
